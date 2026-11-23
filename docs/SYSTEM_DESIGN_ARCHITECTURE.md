@@ -41,7 +41,11 @@
 | D30 | Build for 32-bit Windows 10, which also runs on 64-bit. A 64-bit version is shipped later if the PC allows it | Sets §17 packaging |
 | D31 | Order lookup needs a short random receipt code as well as the number | Adds to D15 |
 | D32 | Admin can take orders, using their own shift | Clarifies §3.2 |
-| D26 | Work goes to `main`. The owner is asked first, and for the commit message, with a suggestion | Process |
+| D26 | Every finished step is committed and pushed to `main` with a descriptive message. Phase summaries in `HANDOFF.md` replace the approval stops (24 November 2026) | Process |
+| D33 | [The screen design](design/Gyros_POS_Design.pdf) is approved. Takeaway is **استلام** and delivery is **دلفري** everywhere | Adds to §19 |
+| D34 | Admin has a page that controls printer output, with a preview. The receipt code, paid/unpaid mark and copy mark cannot be hidden | Adds to §11.2 |
+| D35 | An on-screen keyboard in the app's style opens for typing fields: numbers or letters (Arabic and English) by field. The physical keyboard keeps working | Adds to §19 |
+| D36 | Cashiers pick their name from a list at login instead of typing it. The list contains active cashiers only | Adds to §3.1 |
 
 ### 1.2 Assumed, not confirmed
 
@@ -50,6 +54,7 @@ Used as defaults until the owner says otherwise.
 | ID | Assumption |
 |---|---|
 | A3 | The owner can push to the GitHub repository |
+| A20 | The wording in D33 applies to every Arabic label, including fees and receipts |
 | A4 | Rounding is to the nearest 10,000, halves up. A discounted total never exceeds the undiscounted one |
 | A5 | Undiscounted totals are not rounded |
 | A6 | USD equivalents round **up** to the cent, so paying the displayed USD amount always settles the bill |
@@ -74,7 +79,7 @@ Used as defaults until the owner says otherwise.
 | O1 | POS computer: CPU, RAM, disk, Windows edition. Architecture no longer blocks work (D30) | Finishing Phase 9 |
 | O2 | Printer model, connection, paper width | Finishing Phase 6 |
 | O3 | Windows PC for testing | Finishing Phases 6, 8 and 9 |
-| O4 | Restaurant name, address, phone, logo, footer | Finishing Phase 6 |
+| O4 | Original logo file. Name, address, phone and footer come from the printed menu | Optional |
 | O6 | Should backups be encrypted? They contain customer names, phones and addresses. A lost key makes them useless | Phase 8 |
 
 ## 2. System overview
@@ -241,7 +246,7 @@ Products and categories with history are archived instead of deleted. Payments, 
 
 **Electron:** context isolation and sandbox on, Node integration off, strict CSP, navigation and new windows blocked, single-instance lock.
 
-**Login:** choose a role, then enter username and password. Admin goes to the dashboard; a cashier must open a shift. Argon2id hashing and increasing delays after failures. The recovery key is shown once at setup and replaced after use.
+**Login:** choose a role. Cashiers pick their name and enter a password; Admin enters username and password. Admin goes to the dashboard; a cashier must open a shift. Argon2id hashing and increasing delays after failures. The recovery key is shown once at setup and replaced after use.
 
 **Admin approval:** the Admin password inside a cashier session authorises **one** named action on **one** target, checked by the backend, rate-limited and audited. The session stays the cashier's and gains no other rights.
 

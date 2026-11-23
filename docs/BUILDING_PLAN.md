@@ -1,6 +1,6 @@
 # Gyros POS Building Plan
 
-> **For agentic workers:** execute one phase at a time with superpowers:executing-plans or superpowers:subagent-driven-development. Stop for owner review at every phase gate.
+> **For agentic workers:** execute one phase at a time with superpowers:executing-plans or superpowers:subagent-driven-development. The owner asked for v1 to be built continuously (24 November 2026), so each phase ends with a summary in `HANDOFF.md` instead of a stop.
 
 **Goal:** Deliver a fully offline Arabic/English restaurant POS for one Windows 10 computer.
 
@@ -8,7 +8,7 @@
 
 **Spec:** [SYSTEM_DESIGN_ARCHITECTURE.md](SYSTEM_DESIGN_ARCHITECTURE.md) plus [PROJECT_REPORT.md](PROJECT_REPORT.md). D/A/O codes refer to the architecture document; § numbers refer to the project report.
 
-**Status:** Draft for owner review. No phase has started.
+**Status:** Approved, v1 in progress. Progress and rulings are in [HANDOFF.md](../HANDOFF.md).
 
 Only Phase 1 is broken into tasks. Phases 2–9 state their deliverable, tests and gates; each gets its own task plan when it starts, once the code it builds on exists.
 
@@ -23,11 +23,11 @@ Only Phase 1 is broken into tasks. Phases 2–9 state their deliverable, tests a
 - Existing backups are never overwritten, changed or deleted.
 - Every UI string exists in both Arabic and English.
 - Each business rule has an automated test. Schema changes use migrations.
-- **Git (D26):** before every commit and push, ask the owner, suggest a message, and use the one they approve.
+- **Git (D26):** commit and push each finished step to `main` with a message explaining it.
 
 ## Rules for calling a phase done
 
-A phase is done when its tests pass, it has been run by hand, its limits are reported and the owner approves it.
+A phase is done when its tests pass, it has been run by hand, its limits are reported and its summary is in `HANDOFF.md`.
 
 Work that needs Windows or real hardware has a second status: **"built, not verified on Windows/hardware"**. It cannot be marked done from the Mac. A GitHub Windows runner can build the installer and test file permissions, but it runs Windows Server rather than Windows 10, so it does not replace the final check.
 
