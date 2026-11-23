@@ -1,0 +1,17 @@
+{
+  "app.damaged": "قاعدة البيانات متضررة. لا تستخدم البرنامج واتبع دليل الاستعادة.",
+  "app.ready": "النظام جاهز",
+  "app.starting": "جاري التشغيل",
+  "error.internal_error": "حدث خطأ غير متوقع. حاول مرة أخرى.",
+  "error.invalid_input": "تحقق من المعلومات المدخلة.",
+  "error.no_connection": "لا يمكن الوصول إلى النظام. انتظر قليلاً ثم حاول مرة أخرى.",
+  "error.not_found": "العنصر غير موجود.",
+  "error.unauthorized": "هذا الطلب غير مسموح.",
+  "hide": "إخفاء",
+  "kb.delete": "حذف",
+  "kb.done": "تم",
+  "kb.space": "مسافة",
+  "language.other": "English",
+  "lbp": "ل.ل",
+  "show": "إظهار"
+}

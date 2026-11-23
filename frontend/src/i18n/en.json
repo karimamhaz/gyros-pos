@@ -1,0 +1,17 @@
+{
+  "app.damaged": "The database is damaged. Do not use the app; follow the recovery guide.",
+  "app.ready": "System ready",
+  "app.starting": "Starting",
+  "error.internal_error": "Something unexpected went wrong. Try again.",
+  "error.invalid_input": "Check the information entered.",
+  "error.no_connection": "The system is not responding. Wait a moment and try again.",
+  "error.not_found": "That item was not found.",
+  "error.unauthorized": "This request is not allowed.",
+  "hide": "Hide",
+  "kb.delete": "Delete",
+  "kb.done": "Done",
+  "kb.space": "Space",
+  "language.other": "العربية",
+  "lbp": "LBP",
+  "show": "Show"
+}
