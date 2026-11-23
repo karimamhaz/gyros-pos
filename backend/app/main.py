@@ -23,7 +23,7 @@ log = logging.getLogger("pos")
 
 def create_app(settings: Settings) -> FastAPI:
     setup_logging(settings.data_dir)
-    db = Database(settings.database_path)
+    db = Database(settings.database_path, settings.backup_dir)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -31,12 +31,14 @@ def create_app(settings: Settings) -> FastAPI:
         yield
 
     app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
-    app.state.settings, app.state.db = settings, db
+    app.state.settings, app.state.db, app.state.damaged = settings, db, False
 
     @app.middleware("http")
     async def require_launch_secret(request: Request, call_next):
         if not same_secret(request.headers.get("x-launch-secret", ""), settings.launch_secret):
             return JSONResponse(AppError("unauthorized", 401).body(), 401)
+        if app.state.damaged and request.url.path != "/api/health":
+            return JSONResponse(AppError("damaged", 503).body(), 503)
         return await call_next(request)
 
     @app.exception_handler(AppError)
@@ -55,7 +57,7 @@ def create_app(settings: Settings) -> FastAPI:
 
     @app.get("/api/health")
     def health(_db: PublicDb):
-        return {"status": "ok"}
+        return {"status": "damaged" if app.state.damaged else "ok"}
 
     for router in routers():
         app.include_router(router)

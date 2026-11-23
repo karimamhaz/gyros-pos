@@ -4,6 +4,7 @@ from typing import Literal
 from fastapi import APIRouter, Response
 
 from app.modules.auth.deps import AdminCtx, AnyCtx, QuickCtx
+from app.modules.inventory import service as inventory
 from app.modules.menu import service, transfer
 from app.modules.menu.models import Product
 from app.modules.menu.schemas import (
@@ -33,11 +34,14 @@ def _product(p: Product) -> dict:
 def selling_menu(ctx: AnyCtx):
     """What can be sold now, grouped the way the screen shows it."""
     with ctx.tx() as db:
+        stock = inventory.warnings(db)
         groups = [{"id": c.id, "name": c.name, "products": []} for c in service.categories(db)]
         by_id = {g["id"]: g for g in groups}
         for p in service.products(db):
             if p.available:
-                by_id[p.category_id]["products"].append(_product(p))
+                by_id[p.category_id]["products"].append(
+                    _product(p) | {"stock": stock.get(p.id, "ok")}
+                )
         return [g for g in groups if g["products"]]
 
 

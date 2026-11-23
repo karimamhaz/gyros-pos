@@ -12,6 +12,7 @@ from app.modules.auth import throttle
 from app.modules.auth.deps import Ctx
 from app.modules.auth.models import LoginSession, RecoveryKey
 from app.modules.auth.schemas import Approval, ChangePassword, Recover, Setup
+from app.modules.backups import service as backups
 from app.modules.settings import service as settings
 from app.modules.shifts.models import Shift
 from app.modules.users import service as users
@@ -56,7 +57,7 @@ def open_shift(db: Session) -> Shift | None:
     return db.scalar(select(Shift).where(Shift.open_slot == 1))
 
 
-def _start_session(db: Session, user: User) -> str:
+def _start_session(db: Session, user: User) -> tuple[str, str | None]:
     previous = active_session(db)
     if previous:
         end_session(db, previous, "replaced")
@@ -67,7 +68,7 @@ def _start_session(db: Session, user: User) -> str:
             user_id=user.id, token_hash=token_hash(token), started_at=clock.now(), active_slot=1
         )
     )
-    return token
+    return token, previous and previous.id
 
 
 def login(database: Database, role: str, find, password: str) -> tuple[str, User]:
@@ -82,7 +83,10 @@ def login(database: Database, role: str, find, password: str) -> tuple[str, User
         if role == CASHIER and shift and shift.user_id != user.id:
             name = db.get(User, shift.user_id).display_name
             raise AppError("shift_open_other", 409, name=name)
-        return _start_session(db, user), user
+        token, replaced = _start_session(db, user)
+    if replaced:
+        backups.create(database, "session", replaced)
+    return token, user
 
 
 def login_admin(database: Database, username: str, password: str):
@@ -122,6 +126,7 @@ def logout(ctx: Ctx, password: str) -> None:
         if shift and shift.user_id == ctx.user_id:
             raise AppError("close_shift_first", 409)
         end_session(db, db.get(LoginSession, ctx.session_id), "logout")
+    backups.create(ctx.database, "session", ctx.session_id)
 
 
 def open_quick_admin(ctx: Ctx, password: str) -> int:

@@ -39,8 +39,9 @@ class HasId:
 class Database:
     """One SQLite file with one writer. `lock` also keeps restore apart from requests."""
 
-    def __init__(self, path: Path):
+    def __init__(self, path: Path, backup_dir: Path | None = None):
         self.path = path
+        self.backup_dir = backup_dir or path.parent / "Backups"
         path.parent.mkdir(parents=True, exist_ok=True)
         self.lock = threading.RLock()
         self.engine = create_engine(

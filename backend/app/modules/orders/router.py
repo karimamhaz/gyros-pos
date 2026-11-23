@@ -5,6 +5,7 @@ from fastapi import APIRouter
 
 from app.modules.auth.deps import AdminCtx, AnyCtx
 from app.modules.orders import service
+from app.modules.orders.models import COMPLETED, DELIVERY
 from app.modules.orders.schemas import (
     CancelIn,
     ConfirmIn,
@@ -19,6 +20,7 @@ from app.modules.orders.schemas import (
     VoidIn,
 )
 from app.modules.payments import service as payments
+from app.modules.printing import service as printing
 
 router = APIRouter(prefix="/api/orders")
 
@@ -84,7 +86,10 @@ def set_promo(order_id: str, body: PromoIn, ctx: AnyCtx):
 @router.post("/{order_id}/confirm")
 def confirm(order_id: str, body: ConfirmIn, ctx: AnyCtx):
     with ctx.tx() as db:
-        return service.view(db, service.confirm(db, ctx, order_id, body))
+        order = service.confirm(db, ctx, order_id, body)
+        if order.type == DELIVERY:
+            printing.receipt_once(db, order)
+        return service.view(db, order) | {"print_job": printing.automatic_job(db, order)}
 
 
 @router.post("/{order_id}/quote")
@@ -96,7 +101,10 @@ def quote(order_id: str, body: QuoteIn, ctx: AnyCtx):
 @router.post("/{order_id}/payments")
 def pay(order_id: str, body: PaymentIn, ctx: AnyCtx):
     with ctx.tx() as db:
-        result = service.view(db, payments.pay(db, ctx, order_id, body))
+        order = payments.pay(db, ctx, order_id, body)
+        if order.state == COMPLETED:
+            printing.receipt_once(db, order)
+        result = service.view(db, order) | {"print_job": printing.automatic_job(db, order)}
     return result
 
 

@@ -9,6 +9,7 @@ from app.modules.auth import service as auth
 from app.modules.auth import throttle
 from app.modules.auth.deps import Ctx
 from app.modules.auth.models import LoginSession
+from app.modules.backups import service as backups
 from app.modules.payments.models import Payment, PaymentLine
 from app.modules.settings import service as settings
 from app.modules.shifts.models import Shift, ShiftClosing
@@ -124,7 +125,8 @@ def close_own(ctx: Ctx, data: CloseShift) -> str:
         auth.end_session(db, db.get(LoginSession, ctx.session_id), "logout")
         approver = closer if closer != ctx.user_id else None
         audit.record(db, ctx.user_id, "shift_closed", shift.id, approver)
-        return closing.reference
+    backups.create(ctx.database, "session", ctx.session_id)
+    return closing.reference
 
 
 def close_abandoned(ctx: Ctx, data: CloseAbandoned) -> str:

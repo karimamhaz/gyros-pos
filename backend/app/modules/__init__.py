@@ -3,16 +3,34 @@ from importlib import import_module
 MODELS = (
     "audit",
     "auth",
+    "backups",
+    "expenses",
+    "inventory",
     "menu",
     "orders",
     "payments",
+    "printing",
     "promos",
     "settings",
     "shifts",
     "tables",
     "users",
 )
-ROUTERS = ("auth", "menu", "orders", "promos", "settings", "shifts", "tables", "users")
+ROUTERS = (
+    "auth",
+    "backups",
+    "expenses",
+    "inventory",
+    "menu",
+    "orders",
+    "printing",
+    "promos",
+    "reports",
+    "settings",
+    "shifts",
+    "tables",
+    "users",
+)
 
 
 def load_models() -> None:
