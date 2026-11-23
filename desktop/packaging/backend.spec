@@ -1,12 +1,15 @@
 # PyInstaller folder build of the backend. Run from backend/ with 32-bit Python 3.13.
 import os
 
+from PyInstaller.utils.hooks import collect_submodules
+
 root = os.path.abspath(os.path.join(SPECPATH, "../../backend"))
 a = Analysis(
     [os.path.join(root, "run.py")],
     pathex=[root],
     datas=[(os.path.join(root, "migrations"), "migrations")],
-    hiddenimports=["sqlalchemy.dialects.sqlite", "logging.config"],
+    # Modules are loaded by name at start-up, so the tool cannot find them by itself.
+    hiddenimports=["sqlalchemy.dialects.sqlite", "logging.config", *collect_submodules("app")],
     excludes=["tkinter", "greenlet"],
 )
 pyz = PYZ(a.pure)
