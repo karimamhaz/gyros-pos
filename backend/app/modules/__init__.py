@@ -1,7 +1,18 @@
 from importlib import import_module
 
-MODELS = ("audit", "auth", "menu", "settings", "users")
-ROUTERS = ("auth", "menu", "settings", "users")
+MODELS = (
+    "audit",
+    "auth",
+    "menu",
+    "orders",
+    "payments",
+    "promos",
+    "settings",
+    "shifts",
+    "tables",
+    "users",
+)
+ROUTERS = ("auth", "menu", "orders", "promos", "settings", "shifts", "tables", "users")
 
 
 def load_models() -> None:

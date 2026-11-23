@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from app.modules.auth.deps import AdminCtx, AnyCtx, QuickCtx
 from app.modules.settings import service
 from app.modules.settings.schemas import AppSettings, RateIn
+from app.modules.tables import service as tables
 
 router = APIRouter(prefix="/api/settings")
 
@@ -17,6 +18,7 @@ def read_settings(ctx: AnyCtx):
 @router.put("")
 def save_settings(body: AppSettings, ctx: AdminCtx):
     with ctx.tx() as db:
+        tables.check_count(db, body.table_count)
         return service.save(db, ctx.user_id, body)
 
 

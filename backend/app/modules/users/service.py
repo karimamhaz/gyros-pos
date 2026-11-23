@@ -5,6 +5,7 @@ from app.core import clock
 from app.core.errors import AppError, not_found
 from app.core.security import hash_password
 from app.modules.audit import service as audit
+from app.modules.shifts.models import Shift
 from app.modules.users.models import ADMIN, CASHIER, User
 from app.modules.users.schemas import CashierUpdate, NewCashier
 
@@ -23,7 +24,7 @@ def all_cashiers(db: Session) -> list[User]:
 
 
 def names(db: Session) -> dict[str, str]:
-    return dict(db.execute(select(User.id, User.display_name)).tuples())
+    return {i: name for i, name in db.execute(select(User.id, User.display_name))}
 
 
 def _unique(db: Session, column, value: str, code: str, except_id: str | None = None) -> None:
@@ -62,6 +63,9 @@ def add_cashier(db: Session, actor_id: str, data: NewCashier) -> User:
 def update_cashier(db: Session, actor_id: str, user_id: str, data: CashierUpdate) -> User:
     user = _cashier(db, user_id)
     _unique(db, User.display_name, data.display_name, "name_taken", user_id)
+    on_shift = select(Shift.id).where(Shift.open_slot == 1, Shift.user_id == user_id)
+    if not data.active and db.scalar(on_shift):
+        raise AppError("user_has_open_shift", 409)
     before = {"name": user.display_name, "active": user.active}
     user.display_name, user.active = data.display_name, data.active
     audit.record(

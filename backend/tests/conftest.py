@@ -110,3 +110,18 @@ def pos(fresh):
             {"username": name.lower(), "display_name": name, "password": CASHIER_PASSWORD},
         )
     return fresh
+
+
+@pytest.fixture
+def shop(pos):
+    """A cashier with an open shift and a small menu."""
+    settings = {k: v for k, v in pos.get("/settings").items() if k != "rate"}
+    pos.put("/settings", settings | {"default_delivery_fee": 100000, "table_count": 5})
+    category = pos.post("/menu/categories", {"name": "menu"})["id"]
+    pos.p = {}
+    for name, price in {"beef": 500000, "meal": 450000, "soda": 100000, "odd": 455000}.items():
+        body = {"category_id": category, "name": name, "price_lbp": price}
+        pos.p[name] = pos.post("/menu/products", body)["id"]
+    pos.cashier()
+    pos.post("/shifts/open", {"count": {"usd_cents": 2000, "lbp": 1000000}})
+    return pos

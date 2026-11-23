@@ -13,6 +13,7 @@ from app.modules.auth.deps import Ctx
 from app.modules.auth.models import LoginSession, RecoveryKey
 from app.modules.auth.schemas import Approval, ChangePassword, Recover, Setup
 from app.modules.settings import service as settings
+from app.modules.shifts.models import Shift
 from app.modules.users import service as users
 from app.modules.users.models import ADMIN, CASHIER, User
 
@@ -51,6 +52,10 @@ def active_session(db: Session) -> LoginSession | None:
     return db.scalar(select(LoginSession).where(LoginSession.active_slot == 1))
 
 
+def open_shift(db: Session) -> Shift | None:
+    return db.scalar(select(Shift).where(Shift.open_slot == 1))
+
+
 def _start_session(db: Session, user: User) -> str:
     previous = active_session(db)
     if previous:
@@ -73,6 +78,10 @@ def login(database: Database, role: str, find, password: str) -> tuple[str, User
     throttle.match_password(database, key, candidates, password)
     with database.transaction() as db:
         user = db.get(User, user.id)
+        shift = open_shift(db)
+        if role == CASHIER and shift and shift.user_id != user.id:
+            name = db.get(User, shift.user_id).display_name
+            raise AppError("shift_open_other", 409, name=name)
         return _start_session(db, user), user
 
 
@@ -109,6 +118,9 @@ def approve(ctx: Ctx, approval: Approval) -> str:
 def logout(ctx: Ctx, password: str) -> None:
     check_own_password(ctx, password)
     with ctx.tx() as db:
+        shift = open_shift(db)
+        if shift and shift.user_id == ctx.user_id:
+            raise AppError("close_shift_first", 409)
         end_session(db, db.get(LoginSession, ctx.session_id), "logout")
 
 
