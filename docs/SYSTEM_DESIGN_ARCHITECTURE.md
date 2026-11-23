@@ -49,7 +49,7 @@
 
 ### 1.2 Assumed, not confirmed
 
-Used as defaults until the owner says otherwise.
+Used as defaults until the owner says otherwise. **A4–A10 and A15 were confirmed by the owner on 24 November 2026.**
 
 | ID | Assumption |
 |---|---|

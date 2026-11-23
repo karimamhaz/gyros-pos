@@ -40,7 +40,7 @@ Decisions made while building, where the plan or spec left a choice.
 
 ## Assumptions still to confirm
 
-A3-A20 in the architecture document, most importantly A4-A10 and A15 (money rules). O6 (backup encryption) was not decided; backups are not encrypted.
+A11-A14 and A16-A20 in the architecture document. The money rules A4-A10 and A15 were confirmed on 24 November 2026. O6 (backup encryption) was not decided; backups are not encrypted.
 
 ## Not verified
 
