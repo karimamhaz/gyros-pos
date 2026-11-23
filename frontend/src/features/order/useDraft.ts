@@ -195,6 +195,8 @@ export function useDraft(initial: Order | null) {
     /** False while the server's total does not yet match the screen. */
     settled: !saving && !error,
     flush,
+    /** Saves again, so unsaved items get today's price and availability. */
+    refresh: () => change((c) => ({ ...c })),
     add,
     setQty,
     setNote,

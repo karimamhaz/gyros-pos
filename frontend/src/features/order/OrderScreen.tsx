@@ -87,6 +87,7 @@ function Editor({ menu, initial, onDraft, onDineIn, onSent }: Props & { initial:
         order={order}
         onBack={async () => {
           draft.accept(await api.get<Order>(`/orders/${order.id}`).catch(() => order));
+          draft.refresh();
           setPaying(false);
         }}
         onDone={startNew}

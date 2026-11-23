@@ -420,3 +420,42 @@ test("an unfinished order comes back after the app is killed", async () => {
   expect(readdirSync(path.join(dir, "Backups")).some((f) => f.includes("_recovery_"))).toBe(true);
   await again.close();
 });
+
+test("a price changed during payment is picked up by going back", async () => {
+  test.setTimeout(120_000);
+  const app = await launch();
+  const page = await app.firstWindow();
+  await setUp(page);
+  let token = "";
+  page.on("request", (r) => {
+    token = r.headers()["authorization"] ?? token;
+  });
+  await adminLogin(page);
+  await button(page, "المنتجات").click();
+  await button(page, "استيراد").click();
+  await page.locator("input[type=file]").setInputFiles(MENU);
+  await page.getByRole("button", { name: /^تطبيق/ }).click();
+  await expect(page.getByText("تمت إضافة 17")).toBeVisible();
+  await button(page, "أخذ طلب").click();
+  await button(page, "بدء الوردية").click();
+  await product(page, "لبن").click();
+  await expect(page.locator(".total")).toContainText("70,000");
+  await button(page, "الدفع").click();
+  await button(page, "الباقي ليرة").click();
+  await page.evaluate(async (authorization) => {
+    const headers = { authorization, "content-type": "application/json" };
+    const menu = await (await fetch("/api/menu/all", { headers })).json();
+    const p = menu.products.find((x: { name: string }) => x.name === "لبن");
+    const body = JSON.stringify({ ...p, price_lbp: 80000 });
+    await fetch(`/api/menu/products/${p.id}`, { method: "PUT", headers, body });
+  }, token);
+  await button(page, "تأكيد الدفع").click();
+  await expect(page.getByText("تغير المجموع")).toBeVisible();
+  await button(page, "رجوع إلى الطلب").click();
+  await expect(page.locator(".total")).toContainText("80,000");
+  await button(page, "الدفع").click();
+  await button(page, "الباقي ليرة").click();
+  await button(page, "تأكيد الدفع").click();
+  await expect(page.getByText("تم الدفع")).toBeVisible();
+  await app.close();
+});

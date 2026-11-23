@@ -54,6 +54,7 @@ export function TableOrder({ menu, initial, onOther, onBack }: Props) {
         order={order}
         onBack={async () => {
           draft.reset(await api.get<Order>(`/orders/${order.id}`).catch(() => order));
+          draft.refresh();
           setPaying(false);
         }}
         onDone={async (paid) => {
