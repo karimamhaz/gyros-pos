@@ -35,34 +35,29 @@ const keepFocus = (e: PointerEvent) => e.preventDefault();
 
 export function NumberPad({
   decimal,
+  extra,
   onKey,
 }: {
   decimal: boolean;
+  /** Offered beside 000 where the same pad serves both currencies. */
+  extra?: string;
   onKey: (key: string | "backspace") => void;
 }) {
   const { t } = useI18n();
+  const key = (k: string) => (
+    <button type="button" tabIndex={-1} key={k} onClick={() => onKey(k)}>
+      {k}
+    </button>
+  );
   return (
     <div className="pad" dir="ltr" onPointerDown={keepFocus} onMouseDown={keepFocusMouse}>
-      {[..."123456789"].map((k) => (
-        <button type="button" tabIndex={-1} key={k} onClick={() => onKey(k)}>
-          {k}
-        </button>
-      ))}
-      {decimal ? (
-        <button type="button" tabIndex={-1} onClick={() => onKey(".")}>
-          .
-        </button>
-      ) : (
-        <button type="button" tabIndex={-1} onClick={() => onKey("000")}>
-          000
-        </button>
-      )}
-      <button type="button" tabIndex={-1} onClick={() => onKey("0")}>
-        0
-      </button>
+      {[..."123456789"].map(key)}
+      {key(decimal ? "." : "000")}
+      {key("0")}
       <button type="button" tabIndex={-1} className="word" onClick={() => onKey("backspace")}>
         {t("kb.delete")}
       </button>
+      {extra && key(extra)}
     </div>
   );
 }
@@ -77,27 +72,48 @@ export function OnScreenKeyboard() {
   const kind = keyboardKind(field);
 
   useEffect(() => {
-    const open = (e: FocusEvent) => {
+    // While a finger or mouse is down the page must not move, or the press would miss its button.
+    let pressing = false;
+    let wanted: Field | null = null;
+    const show = (next: Field | null) => {
+      wanted = next;
+      if (!pressing) setField(next);
+    };
+    const down = () => {
+      pressing = true;
+    };
+    const up = () => {
+      if (!pressing) return;
+      pressing = false;
+      setTimeout(() => !pressing && setField(wanted), 0); // after the click itself
+    };
+    const open = (e: Event) => {
       const el = e.target as Field;
       const k = keyboardKind(el);
-      if (!k || k === "none" || el.readOnly || el.disabled) return setField(null);
-      setField(el);
+      if (!k || k === "none" || el.readOnly || el.disabled) return show(null);
       setShift(false);
       setLayout(k === "latin" ? "en" : lang);
+      show(el);
     };
     const reopen = (e: Event) => {
-      if (e.target === document.activeElement) open(e as FocusEvent);
+      if (e.target === document.activeElement && keyboardKind(e.target as Element)) open(e);
     };
-    const close = () => setField(null);
+    const close = () => show(null);
     const physical = (e: KeyboardEvent) => {
       // Someone typing on real keys does not need the panel.
-      if (e.isTrusted && e.key !== "Tab") setField(null);
+      if (e.isTrusted && e.key !== "Tab") show(null);
     };
+    document.addEventListener("pointerdown", down, true);
+    document.addEventListener("pointerup", up, true);
+    document.addEventListener("pointercancel", up, true);
     document.addEventListener("focusin", open);
     document.addEventListener("focusout", close);
     document.addEventListener("click", reopen);
     document.addEventListener("keydown", physical);
     return () => {
+      document.removeEventListener("pointerdown", down, true);
+      document.removeEventListener("pointerup", up, true);
+      document.removeEventListener("pointercancel", up, true);
       document.removeEventListener("focusin", open);
       document.removeEventListener("focusout", close);
       document.removeEventListener("click", reopen);

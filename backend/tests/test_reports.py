@@ -144,7 +144,9 @@ def test_expenses(pos):
         body = entry | {"day": "2026-11-23"} | bad
         assert pos.fails("POST", "/expenses", body) == "invalid_input"
     pos.post("/expenses", entry | {"day": "2026-11-23"})
+    clock.freeze(NOON + timedelta(hours=14))  # 02:00, still the same business day
     listed = pos.get("/expenses?start=2026-11-23&end=2026-11-23")
+    assert listed["today"] == "2026-11-23"
     assert (listed["total"], listed["categories"]) == (5, ["مولد"])
     assert pos.get("/expenses?start=2026-11-24")["entries"] == []
     pos.get("/expenses/export")

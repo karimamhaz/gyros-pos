@@ -101,6 +101,17 @@ describe("on-screen keyboard", () => {
     expect(screen.queryByTestId("keyboard")).toBeNull();
   });
 
+  test("does not move the page while a button is being pressed", async () => {
+    render(<Form kind="digits" />);
+    focus();
+    fireEvent.pointerDown(document.body);
+    act(() => screen.getByLabelText<HTMLInputElement>("field").blur());
+    expect(screen.queryByTestId("keyboard")).not.toBeNull();
+    fireEvent.pointerUp(document.body);
+    await act(() => new Promise((r) => setTimeout(r, 5)));
+    expect(screen.queryByTestId("keyboard")).toBeNull();
+  });
+
   test("types money with separators", () => {
     function Money() {
       const [v, setV] = useState(0);

@@ -1,19 +1,7 @@
 import { execSync } from "node:child_process";
-import { mkdtempSync } from "node:fs";
-import { tmpdir } from "node:os";
-import path from "node:path";
-import { _electron as electron, expect, test, type ElectronApplication } from "@playwright/test";
+import { expect, test, type ElectronApplication } from "@playwright/test";
+import { dataDir, launch } from "./app";
 
-const dataDir = () => mkdtempSync(path.join(tmpdir(), "pos-"));
-const launch = (dir = dataDir()) =>
-  electron.launch({
-    args: [path.resolve(__dirname, ".."), `--user-data-dir=${dir}`],
-    env: {
-      ...(process.env as Record<string, string>),
-      POS_DATA_DIR: path.join(dir, "Data"),
-      POS_BACKUP_DIR: path.join(dir, "Backups"),
-    },
-  });
 const backends = (app: ElectronApplication) =>
   execSync(`pgrep -P ${app.process().pid} -f app.main || true`).toString().trim();
 

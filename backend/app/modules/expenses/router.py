@@ -5,6 +5,7 @@ from fastapi import APIRouter, Response
 from app.modules.auth.deps import AdminCtx
 from app.modules.expenses import service
 from app.modules.expenses.service import ExpenseIn
+from app.modules.orders import service as orders
 from app.modules.reports.sheets import XLSX, workbook
 
 router = APIRouter(prefix="/api/expenses")
@@ -18,6 +19,7 @@ def list_expenses(ctx: AdminCtx, start: date | None = None, end: date | None = N
             "entries": service.entries(db, start, end),
             "total": service.total(db, start, end)[1],
             "categories": service.categories(db),
+            "today": orders.today(db),
         }
 
 
