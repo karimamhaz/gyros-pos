@@ -12,8 +12,11 @@ from fastapi.responses import JSONResponse
 from app.core.config import Settings
 from app.core.database import Database
 from app.core.errors import AppError
+from app.core.lifecycle import start
 from app.core.logging import setup_logging
 from app.core.security import same_secret
+from app.modules import routers
+from app.modules.auth.deps import PublicDb
 
 log = logging.getLogger("pos")
 
@@ -23,8 +26,8 @@ def create_app(settings: Settings) -> FastAPI:
     db = Database(settings.database_path)
 
     @asynccontextmanager
-    async def lifespan(_app: FastAPI):
-        db.migrate()
+    async def lifespan(app: FastAPI):
+        start(app)
         yield
 
     app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
@@ -51,9 +54,11 @@ def create_app(settings: Settings) -> FastAPI:
         return JSONResponse(AppError("internal_error", 500).body(), 500)
 
     @app.get("/api/health")
-    def health():
+    def health(_db: PublicDb):
         return {"status": "ok"}
 
+    for router in routers():
+        app.include_router(router)
     return app
 
 
