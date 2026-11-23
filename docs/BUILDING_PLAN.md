@@ -8,7 +8,7 @@
 
 **Spec:** [SYSTEM_DESIGN_ARCHITECTURE.md](SYSTEM_DESIGN_ARCHITECTURE.md) plus [PROJECT_REPORT.md](PROJECT_REPORT.md). D/A/O codes refer to the architecture document; § numbers refer to the project report.
 
-**Status:** Approved, v1 in progress. Progress and rulings are in [HANDOFF.md](../HANDOFF.md).
+**Status:** v1 code written; Windows and hardware gates open. Progress and rulings are in [HANDOFF.md](../HANDOFF.md).
 
 Only Phase 1 is broken into tasks. Phases 2–9 state their deliverable, tests and gates; each gets its own task plan when it starts, once the code it builds on exists.
 

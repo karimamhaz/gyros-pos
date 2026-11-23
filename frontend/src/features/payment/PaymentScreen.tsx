@@ -141,7 +141,7 @@ export function PaymentScreen({ order, onBack, onDone }: Props) {
           <div className="grid gap-5" style={{ gridTemplateColumns: "330px 1fr" }}>
             <NumberPad
               decimal={false}
-              extra="."
+              both
               onKey={(k) => {
                 const field = active.current ?? firstField();
                 if (!field) return;

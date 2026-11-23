@@ -35,12 +35,12 @@ const keepFocus = (e: PointerEvent) => e.preventDefault();
 
 export function NumberPad({
   decimal,
-  extra,
+  both,
   onKey,
 }: {
   decimal: boolean;
-  /** Offered beside 000 where the same pad serves both currencies. */
-  extra?: string;
+  /** One pad for both currencies: a point and 000. */
+  both?: boolean;
   onKey: (key: string | "backspace") => void;
 }) {
   const { t } = useI18n();
@@ -52,12 +52,17 @@ export function NumberPad({
   return (
     <div className="pad" dir="ltr" onPointerDown={keepFocus} onMouseDown={keepFocusMouse}>
       {[..."123456789"].map(key)}
-      {key(decimal ? "." : "000")}
+      {key(decimal || both ? "." : "000")}
       {key("0")}
-      <button type="button" tabIndex={-1} className="word" onClick={() => onKey("backspace")}>
+      {both && key("000")}
+      <button
+        type="button"
+        tabIndex={-1}
+        className={both ? "word full" : "word"}
+        onClick={() => onKey("backspace")}
+      >
         {t("kb.delete")}
       </button>
-      {extra && key(extra)}
     </div>
   );
 }
@@ -125,7 +130,7 @@ export function OnScreenKeyboard() {
   useEffect(() => {
     const root = document.documentElement;
     root.style.setProperty("--kb", field ? `${panel.current?.offsetHeight ?? 0}px` : "0px");
-    if (field) requestAnimationFrame(() => field.scrollIntoView?.({ block: "nearest" }));
+    if (field) requestAnimationFrame(() => field.scrollIntoView?.({ block: "center" }));
   }, [field, layout]);
 
   // A dialog that closes takes its field with it, without a blur event.

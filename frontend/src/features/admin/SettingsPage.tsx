@@ -16,10 +16,10 @@ import {
 import { Head } from "./Head";
 import { useSettingsForm } from "./useSettingsForm";
 
-const HOURS = Array.from(
-  { length: 12 },
-  (_, h) => [String(h * 60), `${h || 12}:00 AM`] as [string, string],
-);
+const HOURS = Array.from({ length: 12 }, (_, h): [string, string] => [
+  String(h * 60),
+  `${String(h).padStart(2, "0")}:00`,
+]);
 
 export function SettingsPage() {
   const { t, setLang } = useI18n();

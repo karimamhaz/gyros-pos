@@ -43,15 +43,15 @@ export function MenuGrid({ menu, quantities, onPick }: Props) {
                 >
                   <span>
                     <bdi>{p.name}</bdi>
+                    {p.stock && p.stock !== "ok" && (
+                      <span className="stock">
+                        <Tag tone={p.stock === "out" ? "bad" : "warn"}>{t(`stock.${p.stock}`)}</Tag>
+                      </span>
+                    )}
                   </span>
                   <span className="price">
                     <Ltr>{formatNumber(p.price_lbp)}</Ltr>
                   </span>
-                  {p.stock && p.stock !== "ok" && (
-                    <span className="stock">
-                      <Tag tone={p.stock === "out" ? "bad" : "warn"}>{t(`stock.${p.stock}`)}</Tag>
-                    </span>
-                  )}
                   {quantities[p.id] ? <i>{quantities[p.id]}</i> : null}
                 </button>
               ))}

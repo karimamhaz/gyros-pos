@@ -296,7 +296,7 @@ function Trend({ r }: { r: Sales }) {
           key={p.at}
           title={`${formatDate(p.at)}: ${formatNumber(p.sales)} (${formatUsdless(p.sales)})`}
         >
-          <b>{roomy && p.sales !== 0 ? <Ltr>{(p.sales / 1e6).toFixed(1)}</Ltr> : ""}</b>
+          <b>{roomy && p.sales !== 0 ? <Ltr>{(p.sales / 1e6).toFixed(2)}</Ltr> : ""}</b>
           <div className="column" style={{ height: `${(Math.max(0, p.sales) / max) * 150}px` }} />
           <span className="soft">{i % every === 0 ? name(p.at) : ""}</span>
         </div>

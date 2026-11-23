@@ -118,7 +118,8 @@ export function Field({
     id,
     value,
     "data-kb": kind,
-    dir: dir ?? (kind === "text" ? ("auto" as const) : ("ltr" as const)),
+    // An empty field follows the page, so its placeholder sits on the right side.
+    dir: dir ?? (kind !== "text" ? ("ltr" as const) : value ? ("auto" as const) : undefined),
     autoComplete: "off",
     onChange: (e: { target: { value: string } }) => onChange(e.target.value),
     ...rest,

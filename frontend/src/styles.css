@@ -77,11 +77,10 @@
 
   /* Screens */
   .screen {
-    height: 100%;
+    height: calc(100% - var(--kb));
     display: flex;
     flex-direction: column;
     position: relative;
-    padding-bottom: var(--kb);
   }
   .screen.dark {
     background: var(--color-ink);
@@ -523,9 +522,11 @@
     font-size: 14px;
   }
   .tile .stock {
-    position: absolute;
-    inset-inline-end: 6px;
-    top: 44px;
+    display: block;
+  }
+  .tile .stock .tag {
+    font-size: 11.5px;
+    padding: 0 6px;
   }
   .ticket {
     width: 420px;
@@ -644,9 +645,8 @@
 
   /* Admin */
   .admin {
-    height: 100%;
+    height: calc(100% - var(--kb));
     display: flex;
-    padding-bottom: var(--kb);
   }
   .side {
     width: 216px;
@@ -696,11 +696,11 @@
     max-width: 190px;
   }
   .kpis {
-    display: grid;
-    grid-template-columns: 1.5fr 0.8fr 1.1fr 1.5fr;
+    display: flex;
     gap: 14px;
   }
   .kpis .box {
+    flex: 1;
     padding: 12px 18px;
   }
   .kpis b {
@@ -709,6 +709,7 @@
     line-height: 1.35;
   }
   .kpis .main {
+    flex: 1.4;
     border-inline-start: 5px solid var(--color-brand);
   }
   .kpis .main b {
@@ -873,5 +874,20 @@
   }
   .pad button.word {
     font-size: 16px;
+  }
+  .pad button.full {
+    grid-column: 1 / -1;
+  }
+  .stepper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .stepper .label {
+    margin: 0;
+  }
+  .stepper .qty span {
+    min-width: 72px;
   }
 }

@@ -1,6 +1,6 @@
 # Gyros POS: System Design Architecture
 
-**Status:** Draft for owner review. Nothing here is implemented yet.
+**Status:** Implemented in v1 except where HANDOFF.md says otherwise.
 **Sources:** [PROJECT_REPORT.md](PROJECT_REPORT.md) ("the spec"; § numbers refer to it) and the owner's answers of 23 November 2026. Where they differ, the owner's answers win.
 **Companion:** [BUILDING_PLAN.md](BUILDING_PLAN.md)
 

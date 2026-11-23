@@ -5,6 +5,7 @@ A fully offline point of sale for one Windows 10 restaurant computer. Arabic and
 - [Architecture and decisions](docs/SYSTEM_DESIGN_ARCHITECTURE.md)
 - [Building plan](docs/BUILDING_PLAN.md)
 - [Approved screen design](docs/design/Gyros_POS_Design.pdf)
+- [Deployment, backup and recovery guide](docs/DEPLOYMENT_GUIDE.md)
 - [Progress, rulings and what is not verified](HANDOFF.md)
 
 ## Parts

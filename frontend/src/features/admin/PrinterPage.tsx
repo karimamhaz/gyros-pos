@@ -66,9 +66,9 @@ export function PrinterPage() {
     unit: string,
     apply: (v: number) => void,
   ) => (
-    <div>
+    <div className="stepper">
       <div className="label">{t(label)}</div>
-      <div className="qty w-fit">
+      <div className="qty">
         <button type="button" aria-label="+" onClick={() => apply(Math.min(max, value + step))}>
           +
         </button>
@@ -138,7 +138,7 @@ export function PrinterPage() {
                 value={p.auto_print ? "on" : "off"}
                 onChange={(v) => change({ auto_print: v === "on" })}
               />
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid gap-2">
                 {stepper("printer.copies", p.copies, 1, 3, 1, "", (copies) => change({ copies }))}
                 {stepper("printer.margin", p.side_margin_mm, 0, 10, 1, "mm", (side_margin_mm) =>
                   change({ side_margin_mm }),
@@ -218,7 +218,7 @@ export function PrinterPage() {
             <iframe
               title={t("printer.preview")}
               srcDoc={html}
-              sandbox=""
+              sandbox="allow-same-origin"
               style={{ width: `${p.paper}mm` }}
             />
           </div>

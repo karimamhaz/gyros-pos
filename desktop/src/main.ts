@@ -28,6 +28,8 @@ const TYPES: Record<string, string> = {
   ".txt": "text/plain",
 };
 
+app.commandLine.appendSwitch("lang", "en-GB"); // dates as day/month/year
+
 protocol.registerSchemesAsPrivileged([
   { scheme: "app", privileges: { standard: true, secure: true, supportFetchAPI: true } },
 ]);

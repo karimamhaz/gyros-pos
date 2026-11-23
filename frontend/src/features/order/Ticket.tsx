@@ -182,7 +182,7 @@ export function Totals({
           </div>
         </div>
       </div>
-      {o && o.paid > 0 && (
+      {o && o.paid > 0 && o.due > 0 && (
         <Row label={t("left")}>
           <b className="text-brand">
             <Lbp value={o.due} />
