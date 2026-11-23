@@ -60,7 +60,9 @@ test("a full day, in Arabic", async () => {
   await fits(page);
   await button(page, "التصنيفات").click();
   await snap(page, "categories");
+  await expect(page.getByRole("dialog")).toBeVisible();
   await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toBeHidden();
 
   // Settings
   await button(page, "الإعدادات").click();
@@ -322,13 +324,17 @@ test("a full day, in Arabic", async () => {
   await snap(page, "orders");
   await page.getByRole("row", { name: "استلام" }).getByText("عرض").click();
   await snap(page, "order-details");
+  await expect(page.getByRole("dialog")).toBeVisible();
   await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toBeHidden();
   await button(page, "النسخ الاحتياطي").click();
   await expect(page.getByRole("row", { name: "سارة" })).toBeVisible();
   await snap(page, "backups");
   await button(page, "استعادة من نسخة").click();
   await snap(page, "restore");
+  await expect(page.getByRole("dialog")).toBeVisible();
   await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toBeHidden();
 
   expect(readdirSync(path.join(dir, "Backups"))).toHaveLength(2);
   expect(problems).toEqual([]);
