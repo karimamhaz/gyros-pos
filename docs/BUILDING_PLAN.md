@@ -42,7 +42,7 @@ Work that needs Windows or real hardware has a second status: **"built, not veri
 | 5 | Dine-in and delivery | – |
 | 6 | Shifts, receipts, printing | O2, O3, O4 to finish |
 | 7 | Reports, inventory, expenses | – |
-| 8 | Backups, restore, crash handling | O3, O6 |
+| 8 | Backups, restore, crash handling | O3 |
 | 9 | Installer and deployment | O1, O2, O3 |
 
 Differences from the spec's order: transactions, autosave and duplicate-payment protection are in Phase 4 rather than Phase 8; basic shifts arrive in Phase 4 because payments must belong to one; a packaging trial is in Phase 1 because it is the biggest technical risk.
@@ -236,8 +236,6 @@ Differences from the spec's order: transactions, autosave and duplicate-payment 
 ## Phase 8: Backups and recovery
 
 **Deliver:** session, recovery, pre-migration and pre-restore backups; restore screen; Windows permissions; manual recovery procedure.
-
-**Before starting:** owner decides O6.
 
 **Tests**
 - Each session creates one verified backup; names never collide, even with the clock moved back.

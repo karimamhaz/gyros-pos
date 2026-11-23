@@ -42,6 +42,7 @@
 | D31 | Order lookup needs a short random receipt code as well as the number | Adds to D15 |
 | D32 | Admin can take orders, using their own shift | Clarifies §3.2 |
 | D26 | Every finished step is committed and pushed to `main` with a descriptive message. Phase summaries in `HANDOFF.md` replace the approval stops (24 November 2026) | Process |
+| D37 | Backups are not encrypted (24 November 2026) | Clarifies §15 |
 | D33 | [The screen design](design/Gyros_POS_Design.pdf) is approved. Takeaway is **استلام** and delivery is **دلفري** everywhere | Adds to §19 |
 | D34 | Admin has a page that controls printer output, with a preview. The receipt code, paid/unpaid mark and copy mark cannot be hidden | Adds to §11.2 |
 | D35 | An on-screen keyboard in the app's style opens for typing fields: numbers or letters (Arabic and English) by field. The physical keyboard keeps working | Adds to §19 |
@@ -80,7 +81,6 @@ Used as defaults until the owner says otherwise. **A4–A10 and A15 were confirm
 | O2 | Printer model, connection, paper width | Finishing Phase 6 |
 | O3 | Windows PC for testing | Finishing Phases 6, 8 and 9 |
 | O4 | Original logo file. Name, address, phone and footer come from the printed menu | Optional |
-| O6 | Should backups be encrypted? They contain customer names, phones and addresses. A lost key makes them useless | Phase 8 |
 
 ## 2. System overview
 
