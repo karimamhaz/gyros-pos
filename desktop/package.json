@@ -1,0 +1,24 @@
+{
+  "name": "gyros-pos",
+  "productName": "Gyros POS",
+  "description": "Offline restaurant point of sale",
+  "author": "Gyros",
+  "private": true,
+  "version": "1.0.0",
+  "main": "build/main.cjs",
+  "scripts": {
+    "compile": "tsc --noEmit && esbuild src/main.ts src/preload.ts --bundle --platform=node --external:electron --outdir=build --out-extension:.js=.cjs --log-level=warning",
+    "start": "npm --prefix ../frontend run build && npm run compile && electron .",
+    "test": "npm --prefix ../frontend run build && npm run compile && playwright test",
+    "lint": "prettier --check ."
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "@types/node": "24.19.2",
+    "electron": "43.8.12",
+    "electron-builder": "26.18.0",
+    "esbuild": "0.28.2",
+    "prettier": "3.10.1",
+    "typescript": "5.9.3"
+  }
+}

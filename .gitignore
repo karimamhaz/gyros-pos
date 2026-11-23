@@ -235,3 +235,6 @@ backend/build/
 .ruff_cache/
 test-results/
 .dev-data/
+
+# Compiled desktop shell
+desktop/build/

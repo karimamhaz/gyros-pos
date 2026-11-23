@@ -1,5 +1,7 @@
 import logging
 import socket
+import sys
+import threading
 from contextlib import asynccontextmanager
 
 import uvicorn
@@ -60,9 +62,18 @@ def serve(settings: Settings, host: str = "127.0.0.1") -> None:
         raise ValueError("the API only listens on 127.0.0.1")
     sock = socket.socket()
     sock.bind((host, settings.port))
+    sock.listen()  # early requests wait instead of failing
     print(f"PORT={sock.getsockname()[1]}", flush=True)  # read by the Electron shell
     config = uvicorn.Config(create_app(settings), log_config=None, access_log=False)
-    uvicorn.Server(config).run(sockets=[sock])
+    server = uvicorn.Server(config)
+
+    def stop_with_parent():
+        sys.stdin.read()  # ends when the shell closes or dies
+        server.should_exit = True
+
+    if not sys.stdin.isatty():
+        threading.Thread(target=stop_with_parent, daemon=True).start()
+    server.run(sockets=[sock])
 
 
 if __name__ == "__main__":

@@ -1,0 +1,25 @@
+appId: com.gyros.pos
+productName: Gyros POS
+electronVersion: 43.8.12
+directories:
+  output: release
+  buildResources: packaging
+files:
+  - build/**
+extraResources:
+  - from: ../frontend/dist
+    to: web
+  - from: ../backend/dist/gyros-backend
+    to: backend
+win:
+  target:
+    - target: nsis
+      arch: [ia32]
+  artifactName: GyrosPOS-Setup-${version}-${arch}.exe
+nsis:
+  oneClick: false
+  perMachine: true
+  allowToChangeInstallationDirectory: false
+  deleteAppDataOnUninstall: false
+  installerLanguages: [en_US, ar_SA]
+publish: null

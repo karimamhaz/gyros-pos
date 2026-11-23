@@ -1,0 +1,40 @@
+# Builds the 32-bit installer. Runs on Windows Server, so it does not replace the Windows 10 check.
+name: Windows installer
+on: [workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-node@v4
+        with: { node-version: 24 }
+      - name: Backend (32-bit)
+        working-directory: backend
+        shell: pwsh
+        run: |
+          $python = "cpython-3.13-windows-x86-none"
+          uv python install $python
+          uv sync --locked --python $python --group package
+          if ((uv pip list) -match "greenlet") { throw "greenlet has no 32-bit build" }
+          uv run --no-sync python -c "import struct; assert struct.calcsize('P') == 4"
+          uv run --no-sync pytest
+          uv run --no-sync pyinstaller ../desktop/packaging/backend.spec --noconfirm
+      - name: Packaged backend answers
+        shell: pwsh
+        run: ./desktop/packaging/smoke.ps1 backend/dist/gyros-backend/gyros-backend.exe
+      - name: Installer
+        shell: pwsh
+        run: |
+          npm --prefix frontend ci
+          npm --prefix frontend run build
+          cd desktop
+          npm ci
+          npm run compile
+          npx electron-builder --win --ia32
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GyrosPOS-Setup
+          path: desktop/release/*.exe
