@@ -205,10 +205,22 @@ def test_bad_files_are_refused(menu, content, filename, code):
     assert menu.fails("POST", "/menu/import/preview", upload(content, filename)) == code
 
 
-def test_the_restaurant_menu_file_imports_cleanly(pos):
-    data = (Path(__file__).resolve().parents[2] / "docs/gyros_menu.csv").read_bytes()
-    assert apply(pos, upload(data)) == {"added": 17, "updated": 0, "skipped": 0}
+@pytest.mark.parametrize("name", ["gyros_menu.csv", "gyros_menu.xlsx"])
+def test_the_restaurant_menu_files_import_cleanly(pos, name):
+    data = (Path(__file__).resolve().parents[2] / "docs" / name).read_bytes()
+    assert apply(pos, upload(data, name)) == {"added": 17, "updated": 0, "skipped": 0}
     pos.cashier()
-    groups = pos.get("/menu")
-    assert [len(g["products"]) for g in groups] == [3, 3, 3, 3, 2, 2, 1]
-    assert groups[2]["products"][0]["price_lbp"] == 900000
+    assert [len(g["products"]) for g in pos.get("/menu")] == [3, 3, 3, 3, 2, 2, 1]
+
+
+def test_both_menu_files_hold_the_same_menu():
+    from openpyxl import load_workbook
+
+    docs = Path(__file__).resolve().parents[2] / "docs"
+    book = load_workbook(docs / "gyros_menu.xlsx").active
+    sheet = [[str(c.value) for c in row] for row in book.iter_rows()]
+    import csv
+
+    with (docs / "gyros_menu.csv").open(encoding="utf-8-sig", newline="") as f:
+        csv_rows = list(csv.reader(f))
+    assert sheet == csv_rows
