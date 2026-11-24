@@ -84,6 +84,12 @@ export function audit(page: Page): Promise<string[]> {
       if (!input) continue;
       const l = rect(label);
       const i = rect(input);
+      if (label.closest(".note-row")) {
+        // Banknote rows put the label beside its field: they must share one centre line.
+        const off = Math.abs(l.top + l.height / 2 - (i.top + i.height / 2));
+        if (off > 3) out.push(`label "${label.textContent}" is ${Math.round(off)}px off centre`);
+        continue;
+      }
       const start =
         document.dir === "rtl" ? Math.abs(l.right - i.right) : Math.abs(l.left - i.left);
       if (start > 1.5)

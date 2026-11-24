@@ -63,12 +63,18 @@
   #root {
     height: 100%;
   }
+  /* "clip", not "hidden": the browser may scroll a hidden box sideways on its own (when a tile
+     is focused or scrolled into view), which pushed the whole screen out of place. */
+  html,
+  body {
+    overflow: clip;
+  }
   body {
     font-size: 15px;
     line-height: 1.45;
     color: var(--color-ink);
     background: var(--color-page);
-    overflow: hidden;
+    overflow: clip;
     user-select: none;
   }
   input,
@@ -216,10 +222,26 @@
     height: 22px;
     accent-color: var(--color-brand);
   }
+  /* Two money columns (dollars, lira) that share the card equally and never push each other. */
+  .count-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+  }
+  .count-head {
+    font-size: 14px;
+    font-weight: 700;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--color-line);
+  }
   .note-row > div {
     display: grid;
-    grid-template-columns: 110px 1fr;
+    grid-template-columns: 76px minmax(0, 1fr);
     align-items: center;
+    gap: 8px;
+  }
+  .note-row .label {
+    margin-bottom: 0;
   }
   .note-row .input,
   .note-row .input input {
@@ -321,6 +343,8 @@
     background: #fff;
     border: 1px solid var(--color-line);
     border-radius: 6px;
+    /* Cards that are grids: the one column may shrink to the card, never push past its edge. */
+    grid-template-columns: minmax(0, 1fr);
   }
   .box.empty {
     padding: 40px;
@@ -637,7 +661,14 @@
     padding: var(--space-bar);
     border-top: 2px solid var(--color-ink);
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 10px;
+  }
+  /* A text box has a built-in width; without this a row of box + button can be wider than its
+     panel and push everything past the edge. */
+  .ticket-foot > *,
+  .flex-1 {
+    min-width: 0;
   }
   .group-label {
     padding: 9px 22px;
@@ -1052,5 +1083,29 @@
   }
   td {
     height: 48px;
+  }
+}
+
+/* Short windows: the Admin menu has 14 buttons, so it must shrink to fit without its own scrollbar. */
+@media (max-height: 700px) {
+  .side {
+    padding: 10px 0;
+  }
+  .side img {
+    width: 112px;
+    height: auto;
+    margin-bottom: 6px;
+  }
+  .side button {
+    min-height: 36px;
+  }
+}
+@media (max-height: 600px) {
+  .side img {
+    width: 84px;
+    margin-bottom: 2px;
+  }
+  .side button {
+    min-height: 32px;
   }
 }

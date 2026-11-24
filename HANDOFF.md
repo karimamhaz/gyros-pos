@@ -2,7 +2,12 @@
 
 Where the project stands, what was decided and why, and what is still unproven. Git history has the detail; [CHANGELOG.md](CHANGELOG.md) lists what changed in each version.
 
-**Current version: 1.2.0** (24 November 2026)
+**Current version: 1.2.1** (24 November 2026)
+
+## What 1.2.1 fixed
+
+Misplaced fields and clipped panels: banknote counting columns, the order footer, Settings and Printer boxes, sideways page shift, Admin menu on short windows. No LBP note above 100,000. Details in [CHANGELOG.md](CHANGELOG.md). Verified in the real Electron app on Linux only; **still to confirm on the Windows PC** (send a screenshot with the About box if anything still looks off).
+
 
 ## What 1.2.0 added
 

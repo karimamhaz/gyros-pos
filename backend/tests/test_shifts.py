@@ -106,6 +106,14 @@ def set_mode(pos, **changes):
     pos.put("/settings", settings | changes)
 
 
+def test_there_is_no_lbp_note_above_100000(pos):
+    set_mode(pos, count_mode="banknotes")
+    pos.cashier()
+    for note in ("1000000", "500000", "250000"):
+        body = {"count": {"notes": {"usd": {}, "lbp": {note: 1}}}}
+        assert pos.fails("POST", "/shifts/open", body) == "invalid_input"
+
+
 def test_banknote_count_is_added_up_by_the_server(pos):
     set_mode(pos, count_mode="banknotes")
     pos.cashier()

@@ -7,10 +7,10 @@ from app.modules.settings.schemas import Lbp, UsdCents
 from app.modules.users.schemas import AnyPassword
 
 USD_NOTES = (100, 50, 20, 10, 5, 2, 1)
-LBP_NOTES = (1_000_000, 500_000, 100_000, 50_000, 20_000, 10_000, 5_000, 1_000)
+LBP_NOTES = (100_000, 50_000, 20_000, 10_000, 5_000, 1_000)
 Pieces = Annotated[int, Field(ge=0, le=100_000)]
 UsdNote = Literal["100", "50", "20", "10", "5", "2", "1"]
-LbpNote = Literal["1000000", "500000", "100000", "50000", "20000", "10000", "5000", "1000"]
+LbpNote = Literal["100000", "50000", "20000", "10000", "5000", "1000"]
 
 
 class Notes(BaseModel):

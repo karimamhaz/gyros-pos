@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.2.1
+
+**Fixes (misplaced fields)**
+- **Counting money by banknotes.** The dollar and lira columns overlapped and spilled out of the card, so labels sat inside the wrong boxes. The two columns now share the card equally, each with a heading, and every label sits level with its box.
+- **Order screen, discount code and total.** The footer (discount code, total, Pay and Cancel) could be wider than its panel and be pushed past the edge, cutting off *Apply* and the total. It now always stays inside the panel.
+- **Settings and Printer pages.** Boxes holding fields could be a few pixels too narrow for them, so fields touched the box edge or the page scrolled sideways on smaller windows (1000 × 560, 1024 × 640, 1093 × 614, 1536 × 864). All boxes now shrink their content to fit.
+- **Whole screen shifting sideways.** Tapping a product that was scrolled out of view could slide the whole screen left, cutting off the logo and the right-hand products. The page can no longer be moved sideways.
+- **Admin menu on short windows.** The 14-button menu was taller than a 614 px window, so *Log out* was cut off and the menu grew its own scrollbar. It now fits.
+
+**Changed**
+- **No LBP note above 100,000.** The banknote count no longer offers 1,000,000 and 500,000 (they do not exist), and the server refuses them.
+
+**Testing**
+- New real-app test `desktop/tests/money-entry.spec.ts` (banknote columns and order footer at 1000 × 560, 1093 × 614, 1366 × 768 and 1920 × 1080) and a backend test for the note limit. The layout audit now also checks banknote rows (label level with its box). The four Admin window sizes that failed before this release pass.
+- Checked in the real Electron app on Linux, not on Windows: still to be confirmed on the restaurant PC.
+
 ## 1.2.0
 
 **New**

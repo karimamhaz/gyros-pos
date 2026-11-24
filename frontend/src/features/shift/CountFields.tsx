@@ -16,7 +16,7 @@ export const emptyCount = (mode: CountMode): Count => ({
 });
 
 const USD = ["100", "50", "20", "10", "5", "2", "1"];
-const LBP = ["1000000", "500000", "100000", "50000", "20000", "10000", "5000", "1000"];
+const LBP = ["100000", "50000", "20000", "10000", "5000", "1000"];
 const sum = (notes: Record<string, number>) =>
   Object.entries(notes).reduce((total, [note, n]) => total + Number(note) * n, 0);
 
@@ -48,7 +48,8 @@ export function CountFields({
     );
   }
   const column = (currency: "usd" | "lbp", list: string[]) => (
-    <div className="grid gap-1.5 content-start">
+    <div className="grid gap-1.5 content-start min-w-0">
+      <h3 className="count-head">{t(currency === "usd" ? "count.usd" : "count.lbp")}</h3>
       {list.map((note) => (
         <div className="note-row" key={note}>
           <Field
@@ -73,7 +74,7 @@ export function CountFields({
     </div>
   );
   return (
-    <div className="grid grid-cols-2 gap-5">
+    <div className="count-grid">
       {column("usd", USD)}
       {column("lbp", LBP)}
     </div>
