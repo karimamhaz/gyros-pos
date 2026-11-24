@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.core import clock
 from app.core.errors import AppError, not_found
 from app.core.money import lbp_to_usd_cents
+from app.modules.orders import service as orders
 from app.modules.orders.models import CONFIRMED, DELIVERY, DRAFT, Order
 from app.modules.payments.models import Payment
 from app.modules.printing.models import FAILED, PENDING, PRINTED, PRINTING, UNKNOWN, PrintJob
@@ -65,6 +66,7 @@ def receipt(db: Session, order: Order) -> dict:
         "paid": order.paid,
         "due": order.due,
         "rate": rate,
+        "wish": orders.paid_by_wish(db, order.id),
         "received": {"usd_cents": cash["USD", "in"], "lbp": cash["LBP", "in"]},
         "change": {"usd_cents": cash["USD", "out"], "lbp": cash["LBP", "out"]},
         "delivery": d
@@ -156,6 +158,7 @@ def test_page(db: Session) -> PrintJob:
         "paid": 1100000,
         "due": 0,
         "rate": rate,
+        "wish": 0,
         "received": {"usd_cents": 0, "lbp": 1100000},
         "change": {"usd_cents": 0, "lbp": 0},
         "delivery": None,

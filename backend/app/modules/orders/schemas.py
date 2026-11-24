@@ -1,6 +1,6 @@
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field, StringConstraints
+from pydantic import BaseModel, Field, StringConstraints, model_validator
 
 from app.modules.auth.schemas import Approval
 from app.modules.settings.schemas import Lbp, UsdCents
@@ -62,6 +62,16 @@ class PaymentIn(QuoteIn):
     version: int
     expected_due: Lbp
     change_lbp: Lbp = 0
+    method: Literal["cash", "wish"] = "cash"
+
+    @model_validator(mode="after")
+    def _wish_has_no_cash(self):
+        # A Wish payment always settles what is left, so there is nothing to count or give back.
+        if self.method == "wish" and (
+            self.usd_cents or self.lbp or self.change_usd_cents or self.change_lbp
+        ):
+            raise ValueError("a Wish payment carries no cash amounts")
+        return self
 
 
 class CancelIn(BaseModel):

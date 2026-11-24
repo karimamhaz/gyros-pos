@@ -88,3 +88,9 @@ def promo(shop, **more):
 def with_promo(shop, order, code="gyros10"):
     body = {"version": order["version"], "code": code}
     return shop.put(f"/orders/{order['id']}/promo", body)
+
+
+def pay_wish(pos, order, **more):
+    """The order is paid by a Wish transfer: no cash is counted, the app only records it."""
+    body = payment(order) | {"method": "wish"} | more
+    return pos.post(f"/orders/{order['id']}/payments", body)

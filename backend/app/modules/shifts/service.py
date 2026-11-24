@@ -75,6 +75,17 @@ def movements(db: Session, shift_id: str) -> dict[tuple[str, str], int]:
     return {(c, d): total for c, d, total in db.execute(query)}
 
 
+def wish_total(db: Session, shift_id: str) -> int:
+    """Paid by Wish during the shift, less refunds. Shown to Admin, never counted as cash."""
+    query = (
+        select(Payment.kind, func.sum(Payment.applied_lbp))
+        .where(Payment.shift_id == shift_id, Payment.method == "wish")
+        .group_by(Payment.kind)
+    )
+    totals = {kind: amount for kind, amount in db.execute(query)}
+    return totals.get("payment", 0) - totals.get("refund", 0)
+
+
 def expected(db: Session, shift: Shift) -> tuple[int, int]:
     m = movements(db, shift.id)
     return (
@@ -177,6 +188,7 @@ def review(db: Session, shift_id: str) -> dict:
         "cash_in": {"usd_cents": m.get(("USD", "in"), 0), "lbp": m.get(("LBP", "in"), 0)},
         "cash_out": {"usd_cents": m.get(("USD", "out"), 0), "lbp": m.get(("LBP", "out"), 0)},
         "expected": {"usd_cents": usd, "lbp": lbp},
+        "wish": wish_total(db, shift_id),
         "declared": closing
         and {"usd_cents": closing.declared_usd_cents, "lbp": closing.declared_lbp},
         "notes": closing and closing.declared_notes,

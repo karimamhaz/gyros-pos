@@ -10,9 +10,14 @@ class Payment(HasId, Base):
     """Append-only. `applied_lbp` is the part that counts toward the order."""
 
     __tablename__ = "payments"
-    __table_args__ = (CheckConstraint("kind IN ('payment', 'refund')", name="kind"),)
+    __table_args__ = (
+        CheckConstraint("kind IN ('payment', 'refund')", name="kind"),
+        CheckConstraint("method IN ('cash', 'wish')", name="method"),
+    )
     order_id: Mapped[str] = mapped_column(ForeignKey("orders.id"), index=True)
     kind: Mapped[str]
+    # Wish is only a record that the customer paid that way; no cash moves through the drawer.
+    method: Mapped[str] = mapped_column(default="cash", server_default="cash")
     idempotency_key: Mapped[str] = mapped_column(unique=True)
     request_hash: Mapped[str]
     rate: Mapped[int]

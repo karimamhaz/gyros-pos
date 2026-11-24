@@ -102,17 +102,23 @@ def pay(db: Session, ctx: Ctx, order_id: str, data: PaymentIn) -> Order:
     order = orders.for_change(db, order_id, data.version, DRAFT, CONFIRMED)
     orders.confirm_items(db, ctx, order, data.expected_due + order.paid)
 
-    received = usd_cents_to_lbp(data.usd_cents, rate) + data.lbp
     due = order.due
-    if received == 0 and due > 0:
-        raise AppError("nothing_received", 409)
-    over, left = max(0, received - due), max(0, due - received)
-    change = _change(over, data.change_usd_cents, rate)
-    if change.lbp != data.change_lbp:
-        raise AppError("change_wrong", 409)
-    settled = settles(order.total, left)
-    if not settled and order.type == TAKEAWAY:
-        raise AppError("not_enough", 409)
+    if data.method == "wish":
+        # Settles exactly what is left: a transfer has no change and no small balance.
+        if due == 0:
+            raise AppError("nothing_to_pay", 409)
+        received, left, change, settled = due, 0, Change(0, 0, 0), True
+    else:
+        received = usd_cents_to_lbp(data.usd_cents, rate) + data.lbp
+        if received == 0 and due > 0:
+            raise AppError("nothing_received", 409)
+        over, left = max(0, received - due), max(0, due - received)
+        change = _change(over, data.change_usd_cents, rate)
+        if change.lbp != data.change_lbp:
+            raise AppError("change_wrong", 409)
+        settled = settles(order.total, left)
+        if not settled and order.type == TAKEAWAY:
+            raise AppError("not_enough", 409)
     if order.promo_id:
         promos.redeem(
             db,
@@ -126,6 +132,7 @@ def pay(db: Session, ctx: Ctx, order_id: str, data: PaymentIn) -> Order:
     payment = Payment(
         order_id=order.id,
         kind="payment",
+        method=data.method,
         idempotency_key=data.idempotency_key,
         request_hash=request_hash,
         rate=rate,
@@ -139,7 +146,7 @@ def pay(db: Session, ctx: Ctx, order_id: str, data: PaymentIn) -> Order:
     )
     db.add(payment)
     db.flush()
-    db.add_all(
+    db.add_all(  # a Wish payment has no cash lines
         _lines(
             payment,
             [
@@ -169,12 +176,15 @@ def _refundable(db: Session, ctx: Ctx, order_id: str, code: str) -> Order:
 def refund_quote(db: Session, ctx: Ctx, order_id: str, data: RefundQuoteIn) -> dict:
     order = _refundable(db, ctx, order_id, data.code)
     rate = settings.require_rate(db)
-    out = _change(order.paid, data.usd_cents, rate)
-    most = order.paid * 100 // rate // 100 * 100
-    while usd_cents_to_lbp(most, rate) > order.paid:
+    wish = orders.paid_by_wish(db, order.id)
+    cash = order.paid - wish  # only this part comes out of the drawer
+    out = _change(cash, data.usd_cents, rate)
+    most = cash * 100 // rate // 100 * 100
+    while usd_cents_to_lbp(most, rate) > cash:
         most -= 100
     return {
-        "amount": order.paid,
+        "amount": cash,
+        "wish": wish,
         "usd_cents": out.usd_cents,
         "lbp": out.lbp,
         "rounding": out.rounding,
@@ -194,26 +204,37 @@ def refund(ctx: Ctx, order_id: str, data: RefundIn) -> dict:
         shift = shifts.require(db, ctx)
         rate = settings.require_rate(db)
         order = _refundable(db, ctx, order_id, data.code)
-        out = _change(order.paid, data.usd_cents, rate)
+        wish = orders.paid_by_wish(db, order.id)
+        cash = order.paid - wish
+        out = _change(cash, data.usd_cents, rate)
         if out.lbp != data.lbp:
             raise AppError("change_wrong", 409)
-        payment = Payment(
-            order_id=order.id,
-            kind="refund",
-            idempotency_key=data.idempotency_key,
-            request_hash=request_hash,
-            rate=rate,
-            applied_lbp=order.paid,
-            change_rounding=out.rounding,
-            shortfall=0,
-            user_id=ctx.user_id,
-            shift_id=shift.id,
-            paid_at=clock.now(),
-            business_date=orders.today(db),
-        )
-        db.add(payment)
-        db.flush()
-        db.add_all(_lines(payment, [("USD", "out", out.usd_cents), ("LBP", "out", out.lbp)]))
+        # The cash part comes out of the drawer; the Wish part is paid back outside the app.
+        parts = [(m, a) for m, a in (("cash", cash), ("wish", wish)) if a]
+        for index, (method, amount) in enumerate(parts):
+            payment = Payment(
+                order_id=order.id,
+                kind="refund",
+                method=method,
+                idempotency_key=data.idempotency_key
+                if index == 0
+                else f"{data.idempotency_key}:wish",
+                request_hash=request_hash,
+                rate=rate,
+                applied_lbp=amount,
+                change_rounding=out.rounding if method == "cash" else 0,
+                shortfall=0,
+                user_id=ctx.user_id,
+                shift_id=shift.id,
+                paid_at=clock.now(),
+                business_date=orders.today(db),
+            )
+            db.add(payment)
+            db.flush()
+            if method == "cash":
+                db.add_all(
+                    _lines(payment, [("USD", "out", out.usd_cents), ("LBP", "out", out.lbp)])
+                )
         order.state, order.refunded_at = REFUNDED, clock.now()
         order.refunded_date = orders.today(db)
         orders.touch(order)
@@ -225,6 +246,7 @@ def refund(ctx: Ctx, order_id: str, data: RefundIn) -> dict:
             approver,
             reason=data.approval.reason,
             amount=order.paid,
+            wish=wish,
         )
         db.flush()
         return orders.view(db, order)

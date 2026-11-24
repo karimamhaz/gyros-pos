@@ -117,6 +117,7 @@ def sales(db: Session, f: Filters) -> dict:
             {"name": n, "sales": v} for n, v in sorted(by_cashier.items(), key=lambda x: -x[1])
         ],
         "cash": _cash(db, f, start, end),
+        "wish": _wish(db, f, start=start, end=end),
         "products": _products(db, f, start, end),
         "profit": _profit(db, f, start, end, total),
     }
@@ -154,6 +155,18 @@ def _cash(db: Session, f: Filters, start: date, end: date) -> dict:
     for currency, direction, amount in db.execute(_narrow(query, f, Payment.user_id)):
         net[currency] += amount if direction == "in" else -amount
     return {"usd_cents": net["USD"], "lbp": net["LBP"]}
+
+
+def _wish(db: Session, f: Filters, start: date, end: date) -> int:
+    """Paid by Wish in the period, less what was paid back. Never part of the cash figure."""
+    query = (
+        select(Payment.kind, func.sum(Payment.applied_lbp))
+        .join(Order, Order.id == Payment.order_id)
+        .where(Payment.method == "wish", Payment.business_date.between(start, end))
+        .group_by(Payment.kind)
+    )
+    totals = {kind: amount for kind, amount in db.execute(_narrow(query, f, Payment.user_id))}
+    return totals.get("payment", 0) - totals.get("refund", 0)
 
 
 def _products(db: Session, f: Filters, start: date, end: date) -> list[dict]:
@@ -203,6 +216,7 @@ def export(db: Session, f: Filters) -> bytes:
         ["Still unpaid LBP", r["outstanding"]],
         ["Cash collected USD", r["cash"]["usd_cents"] / 100],
         ["Cash collected LBP", r["cash"]["lbp"]],
+        ["Paid by Wish LBP", r["wish"]],
     ]
     if r["profit"]:
         summary += [

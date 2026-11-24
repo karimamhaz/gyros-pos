@@ -75,6 +75,14 @@ def for_change(db: Session, order_id: str, version: int, *states: str) -> Order:
     return order
 
 
+def paid_by_wish(db: Session, order_id: str) -> int:
+    """What Wish transfers paid toward this order. History: refunds do not reduce it."""
+    query = select(func.coalesce(func.sum(Payment.applied_lbp), 0)).where(
+        Payment.order_id == order_id, Payment.method == "wish", Payment.kind == "payment"
+    )
+    return db.scalar(query)
+
+
 def payment_state(order: Order) -> str:
     if order.state == REFUNDED:
         return "refunded"
@@ -120,6 +128,7 @@ def view(db: Session, order: Order) -> dict:
         "rounding": order.rounding,
         "total": order.total,
         "paid": order.paid,
+        "paid_wish": paid_by_wish(db, order.id),
         "due": order.due,
         "total_usd_cents": lbp_to_usd_cents(order.total, rate) if rate else None,
         "due_usd_cents": lbp_to_usd_cents(order.due, rate) if rate else None,
@@ -436,6 +445,17 @@ def admin_list(db: Session, day=None, state: str | None = None) -> list[dict]:
     elif state:
         query = query.where(Order.state == state)
     query = query.order_by(Order.confirmed_at.desc(), Order.number.desc()).limit(500)
+    found = list(db.scalars(query))
+    wish_query = (
+        select(Payment.order_id, func.sum(Payment.applied_lbp))
+        .where(
+            Payment.method == "wish",
+            Payment.kind == "payment",
+            Payment.order_id.in_([o.id for o in found]),
+        )
+        .group_by(Payment.order_id)
+    )
+    wish = {order_id: amount for order_id, amount in db.execute(wish_query)}
     return [
         {
             "id": o.id,
@@ -446,9 +466,10 @@ def admin_list(db: Session, day=None, state: str | None = None) -> list[dict]:
             "table_no": o.table_no,
             "cashier": names[o.completed_by or o.created_by],
             "total": o.total,
+            "paid_wish": wish.get(o.id, 0),
             "due": o.due,
             "state": o.state,
             "payment_state": payment_state(o),
         }
-        for o in db.scalars(query)
+        for o in found
     ]
