@@ -65,6 +65,24 @@ describe("receipt page", () => {
     expect(receiptBody(sample(), printer, false)).not.toContain("نسخة");
   });
 
+  test("a Wish payment says so, and shows no cash received or change", () => {
+    const wish = receiptBody(
+      sample({
+        wish: 1400000,
+        received: { usd_cents: 0, lbp: 0 },
+        change: { usd_cents: 0, lbp: 0 },
+      }),
+      printer,
+      false,
+    );
+    expect(wish).toContain("مدفوع عبر");
+    expect(wish).toContain("Wish");
+    expect(wish).toContain("1,400,000");
+    expect(wish).not.toContain("المستلم");
+    expect(wish).not.toContain("الباقي");
+    expect(receiptBody(sample(), printer, false)).not.toContain("Wish"); // a cash sale never mentions it
+  });
+
   test("each status prints its own word", () => {
     const word = (status: Receipt["status"]) => receiptBody(sample({ status }), printer, false);
     expect(word("unpaid")).toContain("غير مدفوع");

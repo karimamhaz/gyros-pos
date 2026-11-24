@@ -18,6 +18,7 @@ export function salesHtml(r: Sales, lang: Lang, t: (key: Key) => string): string
     row(t("sales.refunded_orders"), n(r.refunds)),
     row(t("sales.outstanding"), n(r.outstanding)),
     row(t("sales.cash"), `<bdi dir="ltr">${cashText(r)}</bdi>`),
+    row(t("sales.wish"), n(r.wish)),
   ];
   if (r.profit) {
     summary.push(

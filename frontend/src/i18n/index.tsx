@@ -8,7 +8,7 @@ type Params = Record<string, unknown>;
 
 const texts: Record<Lang, Record<string, string>> = { ar, en };
 
-export function translate(lang: Lang, key: string, params: Params = {}): string | undefined {
+function translate(lang: Lang, key: string, params: Params = {}): string | undefined {
   return texts[lang][key]?.replace(/\{(\w+)\}/g, (_, name) => String(params[name] ?? ""));
 }
 

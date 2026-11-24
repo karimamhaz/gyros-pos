@@ -31,6 +31,7 @@ interface Row {
   table_no: number | null;
   cashier: string;
   total: number;
+  paid_wish: number;
   state: Order["state"];
   payment_state: Order["payment_state"];
 }
@@ -108,9 +109,12 @@ export function OrdersPage() {
                 </b>
               </td>
               <td>
-                <Tag tone={o.state === "cancelled" ? "" : TONE[o.payment_state]}>
-                  {t(o.state === "cancelled" ? "state.cancelled" : `state.${o.payment_state}`)}
-                </Tag>
+                <div className="flex gap-1.5">
+                  <Tag tone={o.state === "cancelled" ? "" : TONE[o.payment_state]}>
+                    {t(o.state === "cancelled" ? "state.cancelled" : `state.${o.payment_state}`)}
+                  </Tag>
+                  {o.paid_wish > 0 && <Tag>{t("pay.method.wish")}</Tag>}
+                </div>
               </td>
               <td>
                 <Button

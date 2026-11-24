@@ -31,6 +31,7 @@ export interface Sales {
   by_type: Record<OrderType, number>;
   by_cashier: { name: string; sales: number }[];
   cash: { usd_cents: number; lbp: number };
+  wish: number;
   products: { id: string; name: string; qty: number }[];
   profit: { profit: number; logged: number } | null;
 }
@@ -237,6 +238,9 @@ function Figures({ r }: { r: Sales }) {
               </Line>
               <Line label={t("lbp")}>
                 <b>{number(r.cash.lbp)}</b>
+              </Line>
+              <Line label={t("pay.method.wish")}>
+                <b>{number(r.wish)}</b>
               </Line>
             </div>
             <div>

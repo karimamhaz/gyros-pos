@@ -43,6 +43,10 @@
 | D32 | Admin can take orders, using their own shift | Clarifies §3.2 |
 | D26 | Every finished step is committed and pushed to `main` with a descriptive message. Phase summaries in `HANDOFF.md` replace the approval stops (24 November 2026) | Process |
 | D37 | Backups are not encrypted (24 November 2026) | Clarifies §15 |
+| D38 | An order can be recorded as paid by Wish. Only a record: no gateway, no cash in the drawer, no change. It settles what is left of the order | Adds to §6 |
+| D39 | When paying, the LBP box is filled with the whole amount due | Adds to §4 |
+| D40 | The application has its own icon, made from the logo | Adds to §19 |
+| D41 | The interface keeps generous margins; windows down to 1000 × 560 are supported | Adds to §14 |
 | D33 | [The screen design](design/Gyros_POS_Design.pdf) is approved. Takeaway is **استلام** and delivery is **دلفري** everywhere | Adds to §19 |
 | D34 | Admin has a page that controls printer output, with a preview. The receipt code, paid/unpaid mark and copy mark cannot be hidden | Adds to §11.2 |
 | D35 | An on-screen keyboard in the app's style opens for typing fields: numbers or letters (Arabic and English) by field. The physical keyboard keeps working | Adds to §19 |
@@ -56,6 +60,10 @@ Used as defaults until the owner says otherwise. **A4–A10 and A15 were confirm
 |---|---|
 | A3 | The owner can push to the GitHub repository |
 | A20 | The wording in D33 applies to every Arabic label, including fees and receipts |
+| A21 | A Wish payment always settles the whole amount left; a table may pay part in cash and the rest by Wish, but Wish is never partial |
+| A22 | Refunding a Wish payment is recorded, not performed: the cash part comes from the drawer, the Wish part is paid back by the cashier through Wish outside the app |
+| A23 | Wish payments belong to the shift that took them, are shown to Admin beside cash and never count as cash. The app cannot verify a transfer, so Admin should compare the totals with the Wish statement |
+| A24 | Typing dollars replaces the suggested LBP amount; typing LBP yourself keeps it |
 | A4 | Rounding is to the nearest 10,000, halves up. A discounted total never exceeds the undiscounted one |
 | A5 | Undiscounted totals are not rounded |
 | A6 | The displayed USD equivalent is the smallest amount in cents that settles the bill (normally rounded **up**), so paying it always settles the bill |

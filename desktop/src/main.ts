@@ -139,8 +139,8 @@ function openWindow() {
   window = new BrowserWindow({
     width: 1366,
     height: 768,
-    minWidth: 1024,
-    minHeight: 640,
+    minWidth: 1000,
+    minHeight: 560,
     backgroundColor: "#161616",
     show: false,
     webPreferences: {

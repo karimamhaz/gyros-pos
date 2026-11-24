@@ -45,6 +45,11 @@ export function OrderDetails({ order }: { order: Order }) {
       ))}
       <div className="border-t-2 pt-2">
         <Totals order={order} />
+        {order.paid_wish > 0 && (
+          <Line label={t("paid.by_wish_amount")}>
+            <Lbp value={order.paid_wish} />
+          </Line>
+        )}
       </div>
     </div>
   );

@@ -4,7 +4,7 @@
   "description": "Offline restaurant point of sale",
   "author": "Gyros",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.2.0",
   "main": "build/main.cjs",
   "scripts": {
     "compile": "tsc --noEmit && esbuild src/main.ts src/preload.ts --bundle --platform=node --external:electron --outdir=build --out-extension:.js=.cjs --log-level=warning",

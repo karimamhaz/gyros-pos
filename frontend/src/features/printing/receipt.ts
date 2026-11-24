@@ -81,11 +81,14 @@ export function receiptBody(r: Receipt, p: PrinterSettings, copy: boolean): stri
   if (r.rounding) out.push(row("تدوير", lbp(r.rounding)));
   out.push(row("<b>المجموع</b>", `<b>${lbp(r.total)}</b>`, "big"));
   if (p.show_usd) out.push(row("بالدولار", ltr(formatUsd(r.total_usd_cents))));
-  if (r.received.usd_cents || r.received.lbp) {
-    out.push("<hr>", row("المستلم", cash(r.received)));
+  const cashIn = r.received.usd_cents || r.received.lbp;
+  if (cashIn || r.wish) out.push("<hr>");
+  if (cashIn) {
+    out.push(row("المستلم", cash(r.received)));
     if (r.change.usd_cents || r.change.lbp) out.push(row("الباقي", cash(r.change)));
-    if (r.status === "partial") out.push(row("<b>المتبقي</b>", `<b>${lbp(r.due)}</b>`));
   }
+  if (r.wish) out.push(row(`مدفوع عبر ${ltr("Wish")}`, lbp(r.wish)));
+  if (r.status === "partial") out.push(row("<b>المتبقي</b>", `<b>${lbp(r.due)}</b>`));
   if (p.show_rate) out.push(row("سعر الصرف", lbp(r.rate)));
   out.push(`<div class="stamp">${STATUS[r.status]}</div>`);
   if (p.show_footer && r.shop.footer) {
@@ -142,6 +145,7 @@ export const sampleReceipt = (shop: Receipt["shop"], rate: number): Receipt => (
   paid: 1400000,
   due: 0,
   rate,
+  wish: 0,
   received: { usd_cents: 1000, lbp: 600000 },
   change: { usd_cents: 0, lbp: 100000 },
   delivery: {

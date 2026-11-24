@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
   type ButtonHTMLAttributes,
+  type FocusEvent,
   type ReactNode,
 } from "react";
 import { useI18n } from "../i18n";
@@ -96,6 +97,8 @@ interface FieldProps {
   dir?: "ltr" | "rtl" | "auto";
   onEnter?: () => void;
   onFocus?: () => void;
+  /** Selects the whole text when the field is tapped, so typing replaces it. */
+  selectAll?: boolean;
 }
 
 export function Field({
@@ -109,6 +112,8 @@ export function Field({
   suggestions,
   onEnter,
   dir,
+  selectAll,
+  onFocus,
   ...rest
 }: FieldProps) {
   const { t } = useI18n();
@@ -122,6 +127,10 @@ export function Field({
     dir: dir ?? (kind !== "text" ? ("ltr" as const) : value ? ("auto" as const) : undefined),
     autoComplete: "off",
     onChange: (e: { target: { value: string } }) => onChange(e.target.value),
+    onFocus: (e: FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      if (selectAll) e.currentTarget.select();
+      onFocus?.();
+    },
     ...rest,
   };
   return (
@@ -176,6 +185,7 @@ export function AmountField({
   return (
     <Field
       kind={currency === "USD" ? "decimal" : "digits"}
+      selectAll
       {...rest}
       value={shown}
       unit={currency === "USD" ? "USD" : t("lbp")}

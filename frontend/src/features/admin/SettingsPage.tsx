@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useI18n, type Lang } from "../../i18n";
 import { api } from "../../shared/api";
 import { parseInteger } from "../../shared/format";
@@ -10,6 +10,8 @@ import {
   Dialog,
   ErrorNote,
   Field,
+  Line,
+  Ltr,
   Segmented,
   useAction,
 } from "../../shared/ui";
@@ -136,10 +138,36 @@ export function SettingsPage() {
           )}
           <h2 className="mt-2">{t("settings.security")}</h2>
           <Button onClick={() => setPassword(true)}>{t("settings.password")}</Button>
+          <About />
         </section>
       </div>
       {password && <PasswordDialog onClose={() => setPassword(false)} />}
     </>
+  );
+}
+
+/** What to send when something looks wrong on a screen: the version and the window size. */
+function About() {
+  const { t } = useI18n();
+  const [size, setSize] = useState(() => `${innerWidth} × ${innerHeight}`);
+  useEffect(() => {
+    const update = () => setSize(`${innerWidth} × ${innerHeight}`);
+    addEventListener("resize", update);
+    return () => removeEventListener("resize", update);
+  }, []);
+  return (
+    <div className="grid gap-1 mt-2">
+      <h2>{t("settings.about")}</h2>
+      <Line label={t("settings.version")}>
+        <Ltr>{__APP_VERSION__}</Ltr>
+      </Line>
+      <Line label={t("settings.window")}>
+        <Ltr>{size}</Ltr>
+      </Line>
+      <Line label={t("settings.scaling")}>
+        <Ltr>{Math.round(devicePixelRatio * 100)}%</Ltr>
+      </Line>
+    </div>
   );
 }
 

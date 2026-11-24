@@ -107,6 +107,7 @@ export interface Order {
   rounding: number;
   total: number;
   paid: number;
+  paid_wish: number;
   due: number;
   total_usd_cents: number | null;
   due_usd_cents: number | null;
@@ -150,6 +151,8 @@ export interface Receipt {
   paid: number;
   due: number;
   rate: number;
+  /** Paid by Wish, in LBP. Not part of the cash received. */
+  wish: number;
   received: { usd_cents: number; lbp: number };
   change: { usd_cents: number; lbp: number };
   delivery: Delivery | null;

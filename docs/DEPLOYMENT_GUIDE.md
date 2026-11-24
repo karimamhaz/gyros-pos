@@ -15,6 +15,10 @@
 
 An unsigned installer may show a Windows SmartScreen warning.
 
+## Paid by Wish
+
+Wish is recorded, not processed: the cashier chooses **Wish** on the payment screen after the customer's transfer has reached the restaurant, and the app records the order as paid. It never touches the cash drawer. Because the app cannot check a transfer, **compare the Admin → Sales "Paid by Wish" total (and each shift's review) with the Wish account statement** regularly.
+
 ## Where things are
 
 | What | Folder |
@@ -45,6 +49,9 @@ After a normal restore the replaced database is also kept as `Data\pos.before-re
 ## Checklist before real use
 
 - [ ] Installs on a reset Windows 10 machine with the network off and no Python, Node.js or Docker
+- [ ] The Gyros icon shows on the installer, the desktop shortcut, the taskbar and the window
+- [ ] Every screen: margins, fields in line (send a photo with Settings → About open if anything looks off)
+- [ ] A cash sale in one tap, and a sale paid by Wish
 - [ ] Sale, restart, sale still there
 - [ ] `desktop/packaging/backup-acl-test.ps1` passes, run as the standard user
 - [ ] API not reachable from another computer

@@ -1,9 +1,13 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 import { audit } from "./layout";
 import { button, launch, snap } from "./app";
 import { ADMIN_PASSWORD, resize, seed } from "./seed";
 
 const SIZES: [number, number][] = [
+  [1000, 560], // the smallest window
+  [1093, 614], // a 1366 x 768 screen at 125% scaling
   [1024, 640],
   [1280, 720],
   [1366, 768],
@@ -22,6 +26,9 @@ const ADMIN_PAGES = [
   "النسخ الاحتياطي",
 ];
 
+const { version } = JSON.parse(
+  readFileSync(path.resolve(__dirname, "../../frontend/package.json"), "utf8"),
+);
 const problems: string[] = [];
 async function check(page: Page, where: string) {
   await page.waitForTimeout(150);
@@ -52,6 +59,9 @@ async function journey(page: Page, label: string) {
   await button(page, "استلام").click();
   await button(page, "الدفع").click();
   await check(page, `${label} payment`);
+  await button(page, "Wish").click();
+  await check(page, `${label} payment by Wish`);
+  await button(page, "نقداً").click();
   await button(page, "رجوع إلى الطلب").click();
   await page.locator(".topbar nav").getByText("الطاولات").click();
   await check(page, `${label} tables`);
@@ -97,6 +107,8 @@ for (const [w, h] of SIZES) {
     await page.getByRole("row", { name: "لبن" }).getByText("تعديل").click();
     await check(page, `${w}x${h} product editor`);
     await button(page, "الإعدادات").click();
+    await check(page, `${w}x${h} settings`);
+    await expect(page.getByText(version)).toBeVisible(); // the About box, for support
     await page.getByLabel("عدد الطاولات").click();
     await check(page, `${w}x${h} settings keyboard`);
     expect(problems).toEqual([]);

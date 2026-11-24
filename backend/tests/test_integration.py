@@ -8,8 +8,8 @@ from alembic.migration import MigrationContext
 from sqlalchemy import inspect, text
 from sqlalchemy.exc import IntegrityError
 
+import app.modules  # noqa: F401
 from app.core.database import Base, Database
-from app.modules import load_models
 from tests.selling import rows, takeaway
 from tests.test_auth import api_routes, guard
 
@@ -27,7 +27,6 @@ def test_migrations_go_up_down_and_up_again(tmp_path):
 
 
 def test_models_and_migrations_describe_the_same_database(tmp_path):
-    load_models()
     db = Database(tmp_path / "d.db")
     db.migrate()
     with db.engine.connect() as conn:

@@ -12,11 +12,15 @@ extraResources:
   - from: ../backend/dist/gyros-backend
     to: backend
 win:
+  icon: packaging/icon.ico
   target:
     - target: nsis
       arch: [ia32]
   artifactName: GyrosPOS-Setup-${version}-${arch}.exe
 nsis:
+  installerIcon: packaging/icon.ico
+  uninstallerIcon: packaging/icon.ico
+  installerHeaderIcon: packaging/icon.ico
   oneClick: false
   perMachine: true
   allowToChangeInstallationDirectory: false

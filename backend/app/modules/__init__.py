@@ -31,10 +31,6 @@ from app.modules.tables import router as tables_router
 from app.modules.users import router as users_router
 
 
-def load_models() -> None:
-    """Importing this module has already loaded every model, so Alembic sees all tables."""
-
-
 def routers():
     return [
         auth_router.router,

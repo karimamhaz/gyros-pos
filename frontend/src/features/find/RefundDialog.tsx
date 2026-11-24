@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { formatNumber } from "../../shared/format";
 import { useI18n } from "../../i18n";
 import { api } from "../../shared/api";
 import type { Order } from "../../shared/types";
@@ -6,7 +7,10 @@ import { ApprovalDialog } from "../../shared/ApprovalForm";
 import { AmountField, Button, ErrorNote, Lbp, Line, useLoad } from "../../shared/ui";
 
 interface Quote {
+  /** Cash to give back from the drawer. */
   amount: number;
+  /** Paid by Wish; paid back outside the app. */
+  wish: number;
   usd_cents: number;
   lbp: number;
   rounding: number;
@@ -43,28 +47,40 @@ export function RefundDialog({ order, code, onClose, onDone }: Props) {
     >
       {q && (
         <>
-          <Line label={t("refund.amount")}>
-            <b>
-              <Lbp value={q.amount} />
-            </b>
-          </Line>
-          <div className="grid grid-cols-2 gap-3 items-end">
-            <AmountField label={t("pay.give_usd")} currency="USD" value={usd} onChange={setUsd} />
-            <div>
-              <div className="label">{t("pay.give_lbp")}</div>
-              <div className="text-[22px] font-bold">
-                <Lbp value={q.lbp} />
+          {q.wish > 0 && (
+            <div className="status">{t("refund.wish", { amount: formatNumber(q.wish) })}</div>
+          )}
+          {q.amount > 0 && (
+            <>
+              <Line label={t("refund.amount")}>
+                <b>
+                  <Lbp value={q.amount} />
+                </b>
+              </Line>
+              <div className="grid grid-cols-2 gap-3 items-end">
+                <AmountField
+                  label={t("pay.give_usd")}
+                  currency="USD"
+                  value={usd}
+                  onChange={setUsd}
+                />
+                <div>
+                  <div className="label">{t("pay.give_lbp")}</div>
+                  <div className="text-[22px] font-bold">
+                    <Lbp value={q.lbp} />
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <Button size="s" onClick={() => setUsd(0)}>
-              {t("pay.change.lbp")}
-            </Button>
-            <Button size="s" onClick={() => setUsd(q.most_usd_cents)}>
-              {t("pay.change.usd")}
-            </Button>
-          </div>
+              <div className="flex gap-2">
+                <Button size="s" onClick={() => setUsd(0)}>
+                  {t("pay.change.lbp")}
+                </Button>
+                <Button size="s" onClick={() => setUsd(q.most_usd_cents)}>
+                  {t("pay.change.usd")}
+                </Button>
+              </div>
+            </>
+          )}
         </>
       )}
       <ErrorNote error={quote.error} />

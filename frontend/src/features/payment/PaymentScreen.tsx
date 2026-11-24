@@ -9,10 +9,12 @@ import { SavedLines, Totals } from "../order/Ticket";
 import { PrintStatus } from "../printing/PrintStatus";
 
 type ChangeMode = "lbp" | "usd" | "mixed";
+type Method = "cash" | "wish";
 interface Body {
   idempotency_key: string;
   version: number;
   expected_due: number;
+  method: Method;
   usd_cents: number;
   lbp: number;
   change_usd_cents: number;
@@ -20,6 +22,7 @@ interface Body {
 }
 interface Done {
   order: Order;
+  method: Method;
   change_usd_cents: number;
   change_lbp: number;
 }
@@ -32,8 +35,11 @@ interface Props {
 
 export function PaymentScreen({ order, onBack, onDone }: Props) {
   const { t } = useI18n();
+  const [method, setMethod] = useState<Method>("cash");
   const [usd, setUsd] = useState(0);
-  const [lbp, setLbp] = useState(0);
+  // The usual payment is the whole bill in LBP, so it is already filled in.
+  const [lbp, setLbp] = useState(order.due);
+  const [lbpTyped, setLbpTyped] = useState(false);
   const [mode, setMode] = useState<ChangeMode>("lbp");
   const [mixedUsd, setMixedUsd] = useState(0);
   const [answer, setAnswer] = useState<{ asked: string; quote: Quote } | null>(null);
@@ -47,9 +53,11 @@ export function PaymentScreen({ order, onBack, onDone }: Props) {
   const quote = answer?.quote ?? null;
   const fields = useRef<HTMLDivElement>(null);
   const active = useRef<HTMLInputElement | null>(null);
+  const locked = busy || uncertain !== null;
 
   // The server works out the balance and the change; old answers are ignored.
   useEffect(() => {
+    if (method !== "cash") return;
     const mine = ++turn.current;
     const ask = async () => {
       const body = { usd_cents: usd, lbp };
@@ -67,9 +75,7 @@ export function PaymentScreen({ order, onBack, onDone }: Props) {
       }
     };
     void ask();
-  }, [order.id, usd, lbp, mode, mixedUsd, asked]);
-
-  const firstField = () => fields.current?.querySelector("input") ?? null;
+  }, [method, order.id, usd, lbp, mode, mixedUsd, asked]);
 
   const send = async (body: Body) => {
     setBusy(true);
@@ -78,7 +84,12 @@ export function PaymentScreen({ order, onBack, onDone }: Props) {
       try {
         const paid = await api.post<Order>(`/orders/${order.id}/payments`, body);
         setUncertain(null);
-        setDone({ order: paid, ...body });
+        setDone({
+          order: paid,
+          method: body.method,
+          change_usd_cents: body.change_usd_cents,
+          change_lbp: body.change_lbp,
+        });
         break;
       } catch (e) {
         // Without an answer it may already be saved, so only the same request is repeated.
@@ -101,147 +112,188 @@ export function PaymentScreen({ order, onBack, onDone }: Props) {
     quote !== null &&
     answer?.asked === asked &&
     (mode !== "mixed" || quote.change_usd_cents === mixedUsd || quote.overpaid === 0);
-  const partial = quote !== null && !quote.settled && quote.partial_allowed;
-  const ready = fresh && quote !== null && (quote.settled || partial) && !error;
+  const partial = method === "cash" && quote !== null && !quote.settled && quote.partial_allowed;
+  const ready =
+    method === "wish"
+      ? order.due > 0 && !error
+      : fresh && quote !== null && (quote.settled || partial) && !error;
+
+  const body = (): Body => {
+    const base = { idempotency_key: key, version: order.version, expected_due: order.due };
+    return method === "wish"
+      ? { ...base, method, usd_cents: 0, lbp: 0, change_usd_cents: 0, change_lbp: 0 }
+      : {
+          ...base,
+          method,
+          usd_cents: usd,
+          lbp,
+          change_usd_cents: quote!.change_usd_cents,
+          change_lbp: quote!.change_lbp,
+        };
+  };
+
+  // Dollars and the suggested LBP amount are alternatives, until the cashier types LBP herself.
+  const typeUsd = (value: number) => {
+    setUsd(value);
+    if (!lbpTyped) setLbp(value > 0 ? 0 : order.due);
+  };
 
   if (done) return <Paid done={done} onDone={() => onDone(done.order)} />;
   return (
     <div className="order">
-      <div className="work" style={{ padding: "18px 28px" }}>
+      <div className="work roomy">
         <div className="line">
           <h1>{t("pay")}</h1>
-          <Button disabled={busy || uncertain !== null} onClick={onBack}>
+          <div className="method">
+            <Segmented<Method>
+              label={t("pay.method")}
+              options={[
+                ["cash", t("pay.method.cash")],
+                ["wish", t("pay.method.wish")],
+              ]}
+              value={method}
+              onChange={(next) => !locked && setMethod(next)}
+            />
+          </div>
+          <Button disabled={locked} onClick={onBack}>
             {t("pay.back")}
           </Button>
         </div>
-        <fieldset disabled={busy || uncertain !== null} className="grid gap-4">
-          <div
-            className="grid grid-cols-2 gap-4 big-input"
-            ref={fields}
-            onFocus={(e) => {
-              active.current = e.target as unknown as HTMLInputElement;
-            }}
-          >
-            <AmountField
-              label={t("pay.got_usd")}
-              currency="USD"
-              kind="none"
-              value={usd}
-              onChange={setUsd}
-              autoFocus
-            />
-            <AmountField
-              label={t("pay.got_lbp")}
-              currency="LBP"
-              kind="none"
-              value={lbp}
-              onChange={setLbp}
-            />
-          </div>
-          <div className="grid gap-5" style={{ gridTemplateColumns: "330px 1fr" }}>
-            <NumberPad
-              decimal={false}
-              both
-              onKey={(k) => {
-                const field = active.current ?? firstField();
-                if (!field) return;
-                if (document.activeElement !== field) field.focus();
-                typeInto(field, k);
+        {method === "wish" ? (
+          <WishPanel order={order} />
+        ) : (
+          <fieldset disabled={locked} className="grid gap-5">
+            <div
+              className="grid grid-cols-2 gap-5 big-input"
+              ref={fields}
+              onFocus={(e) => {
+                active.current = e.target as unknown as HTMLInputElement;
               }}
-            />
-            <div className="box p-5 grid gap-3 content-start">
-              {quote && quote.overpaid > 0 ? (
-                <>
-                  <div className="line">
-                    <h2>{t("pay.change")}</h2>
-                    <b className="text-[23px]">
-                      <Lbp value={quote.overpaid} />
-                    </b>
-                  </div>
-                  <Segmented<ChangeMode>
-                    options={[
-                      ["lbp", t("pay.change.lbp")],
-                      ["usd", t("pay.change.usd")],
-                      ["mixed", t("pay.change.mixed")],
-                    ]}
-                    value={mode}
-                    onChange={(m) => {
-                      setMode(m);
-                      if (m === "mixed") setMixedUsd(quote.change_usd_cents);
-                    }}
-                  />
-                  <div className="grid grid-cols-2 gap-3">
-                    {mode === "mixed" ? (
-                      <AmountField
-                        label={t("pay.give_usd")}
-                        currency="USD"
-                        kind="none"
-                        value={mixedUsd}
-                        onChange={setMixedUsd}
-                        onFocus={() => {
-                          active.current = document.activeElement as HTMLInputElement;
-                        }}
-                      />
-                    ) : (
+            >
+              <AmountField
+                label={t("pay.got_usd")}
+                currency="USD"
+                kind="none"
+                value={usd}
+                onChange={typeUsd}
+                autoFocus
+              />
+              <AmountField
+                label={t("pay.got_lbp")}
+                currency="LBP"
+                kind="none"
+                value={lbp}
+                onChange={(value) => {
+                  setLbpTyped(true);
+                  setLbp(value);
+                }}
+              />
+            </div>
+            <div className="grid gap-5" style={{ gridTemplateColumns: "330px 1fr" }}>
+              <NumberPad
+                decimal={false}
+                both
+                onKey={(k) => {
+                  const field = active.current ?? fields.current?.querySelector("input");
+                  if (!field) return;
+                  if (document.activeElement !== field) field.focus();
+                  typeInto(field, k);
+                }}
+              />
+              <div className="box p-5 grid gap-3 content-start">
+                {quote && quote.overpaid > 0 ? (
+                  <>
+                    <div className="line">
+                      <h2>{t("pay.change")}</h2>
+                      <b className="text-[23px]">
+                        <Lbp value={quote.overpaid} />
+                      </b>
+                    </div>
+                    <Segmented<ChangeMode>
+                      options={[
+                        ["lbp", t("pay.change.lbp")],
+                        ["usd", t("pay.change.usd")],
+                        ["mixed", t("pay.change.mixed")],
+                      ]}
+                      value={mode}
+                      onChange={(m) => {
+                        setMode(m);
+                        if (m === "mixed") setMixedUsd(quote.change_usd_cents);
+                      }}
+                    />
+                    <div className="grid grid-cols-2 gap-3">
+                      {mode === "mixed" ? (
+                        <AmountField
+                          label={t("pay.give_usd")}
+                          currency="USD"
+                          kind="none"
+                          value={mixedUsd}
+                          onChange={setMixedUsd}
+                          onFocus={() => {
+                            active.current = document.activeElement as HTMLInputElement;
+                          }}
+                        />
+                      ) : (
+                        <div>
+                          <div className="label">{t("pay.give_usd")}</div>
+                          <div className="text-[22px] font-bold">
+                            <Usd cents={quote.change_usd_cents} />
+                          </div>
+                        </div>
+                      )}
                       <div>
-                        <div className="label">{t("pay.give_usd")}</div>
+                        <div className="label">{t("pay.give_lbp")}</div>
                         <div className="text-[22px] font-bold">
-                          <Usd cents={quote.change_usd_cents} />
+                          <Lbp value={quote.change_lbp} />
                         </div>
                       </div>
-                    )}
-                    <div>
-                      <div className="label">{t("pay.give_lbp")}</div>
-                      <div className="text-[22px] font-bold">
-                        <Lbp value={quote.change_lbp} />
-                      </div>
                     </div>
-                  </div>
-                  {mode === "mixed" && mixedUsd !== quote.change_usd_cents && (
-                    <div className="error-note">{t("error.change_too_much")}</div>
-                  )}
-                  {quote.change_rounding !== 0 && (
-                    <p className="soft">
-                      {t(quote.change_rounding < 0 ? "pay.rounding.up" : "pay.rounding.down")}{" "}
-                      <Lbp value={Math.abs(quote.change_rounding)} />
-                    </p>
-                  )}
-                </>
-              ) : quote && quote.settled ? (
-                <>
-                  <h2>{t(quote.shortfall ? "pay.small_balance" : "pay.exact")}</h2>
-                  {quote.shortfall > 0 && (
-                    <p>
-                      {t("pay.small_balance.hint")} <Lbp value={quote.shortfall} />
-                    </p>
-                  )}
-                </>
-              ) : quote ? (
-                <>
-                  <div className="line">
-                    <h2>{t("left")}</h2>
-                    <b className="text-[23px] text-brand">
-                      <Lbp value={quote.left} />
-                    </b>
-                  </div>
-                  <div className="line soft">
-                    <span>{t("in_usd")}</span>
-                    <Usd cents={quote.left_usd_cents} />
-                  </div>
-                  <div className="flex gap-2 flex-wrap">
-                    <Button size="s" onClick={() => setLbp(lbp + quote.left)}>
-                      {t("pay.rest_lbp")}
-                    </Button>
-                    <Button size="s" onClick={() => setUsd(usd + quote.left_usd_cents)}>
-                      {t("pay.rest_usd")}
-                    </Button>
-                  </div>
-                </>
-              ) : null}
+                    {mode === "mixed" && mixedUsd !== quote.change_usd_cents && (
+                      <div className="error-note">{t("error.change_too_much")}</div>
+                    )}
+                    {quote.change_rounding !== 0 && (
+                      <p className="soft">
+                        {t(quote.change_rounding < 0 ? "pay.rounding.up" : "pay.rounding.down")}{" "}
+                        <Lbp value={Math.abs(quote.change_rounding)} />
+                      </p>
+                    )}
+                  </>
+                ) : quote && quote.settled ? (
+                  <>
+                    <h2>{t(quote.shortfall ? "pay.small_balance" : "pay.exact")}</h2>
+                    {quote.shortfall > 0 && (
+                      <p>
+                        {t("pay.small_balance.hint")} <Lbp value={quote.shortfall} />
+                      </p>
+                    )}
+                  </>
+                ) : quote ? (
+                  <>
+                    <div className="line">
+                      <h2>{t("left")}</h2>
+                      <b className="text-[23px] text-brand">
+                        <Lbp value={quote.left} />
+                      </b>
+                    </div>
+                    <div className="line soft">
+                      <span>{t("in_usd")}</span>
+                      <Usd cents={quote.left_usd_cents} />
+                    </div>
+                    <div className="flex gap-2 flex-wrap">
+                      <Button size="s" onClick={() => setLbp(lbp + quote.left)}>
+                        {t("pay.rest_lbp")}
+                      </Button>
+                      <Button size="s" onClick={() => setUsd(usd + quote.left_usd_cents)}>
+                        {t("pay.rest_usd")}
+                      </Button>
+                    </div>
+                  </>
+                ) : null}
+              </div>
             </div>
-          </div>
-        </fieldset>
-        {quote && (
+          </fieldset>
+        )}
+        {method === "cash" && quote && (
           <div className="soft">
             {t("rate")}: <Lbp value={quote.rate} />
           </div>
@@ -264,7 +316,7 @@ export function PaymentScreen({ order, onBack, onDone }: Props) {
         </div>
         <div className="ticket-foot">
           <Totals order={order} />
-          {quote && (
+          {method === "cash" && quote && (
             <Line label={t("pay.received")}>
               <Lbp value={quote.received} />
             </Line>
@@ -273,24 +325,47 @@ export function PaymentScreen({ order, onBack, onDone }: Props) {
             variant="primary"
             size="l"
             disabled={busy || (!uncertain && !ready)}
-            onClick={() =>
-              void send(
-                uncertain ?? {
-                  idempotency_key: key,
-                  version: order.version,
-                  expected_due: order.due,
-                  usd_cents: usd,
-                  lbp,
-                  change_usd_cents: quote!.change_usd_cents,
-                  change_lbp: quote!.change_lbp,
-                },
-              )
-            }
+            onClick={() => void send(uncertain ?? body())}
           >
-            {t(uncertain ? "pay.check" : partial ? "pay.partial" : "pay.confirm")}
+            {t(
+              uncertain
+                ? "pay.check"
+                : method === "wish"
+                  ? "pay.wish.confirm"
+                  : partial
+                    ? "pay.partial"
+                    : "pay.confirm",
+            )}
           </Button>
         </div>
       </aside>
+    </div>
+  );
+}
+
+/** Wish is only recorded: the cashier confirms after the transfer reached the restaurant. */
+function WishPanel({ order }: { order: Order }) {
+  const { t } = useI18n();
+  return (
+    <div
+      className="box p-5 grid gap-4 content-start"
+      role="group"
+      aria-label={t("pay.method.wish")}
+    >
+      <h2>{t("pay.wish.title")}</h2>
+      <div className="line">
+        <span>{t("pay.wish.amount")}</span>
+        <b className="text-[29px]">
+          <Lbp value={order.due} />
+        </b>
+      </div>
+      {order.due_usd_cents !== null && (
+        <div className="line soft">
+          <span>{t("in_usd")}</span>
+          <Usd cents={order.due_usd_cents} />
+        </div>
+      )}
+      <p>{t("pay.wish.hint")}</p>
     </div>
   );
 }
@@ -308,6 +383,7 @@ function Paid({ done, onDone }: { done: Done; onDone: () => void }) {
           <Tag tone={paid ? "good" : "warn"}>{t(`state.${order.payment_state}`)}</Tag>
         </div>
         <p className="soft">{t("order.number", { number: order.number })}</p>
+        {done.method === "wish" && <div className="status good">{t("paid.by_wish")}</div>}
         {(done.change_usd_cents > 0 || done.change_lbp > 0) && (
           <div className="box p-4 text-center">
             <div className="soft">{t("paid.give")}</div>

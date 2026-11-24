@@ -1,4 +1,4 @@
-"""Single source of time, so tests can move it."""
+"""Single source of time. Production code only reads it; `freeze` exists for the tests."""
 
 from datetime import UTC, date, datetime, timedelta
 

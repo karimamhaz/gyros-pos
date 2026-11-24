@@ -16,10 +16,12 @@ Add `quick` to skip the real-app tests (about 2 minutes instead of 6).
 | **Integration** | Parts working together: database refuses bad rows, migrations go up and down and match the models, every route survives 16 kinds of garbage as anonymous, cashier and Admin, one API call chain per feature | `backend/tests/test_integration.py`, `test_auth.py`, `test_menu.py`, `test_orders.py`, `test_tables_delivery.py`, `test_shifts.py`, `test_printing.py`, `test_reports.py`, `test_backups.py` |
 | **System** | The whole installed-style app: killed app keeps sales, numbers and the open shift; restore a backup from its screen; works with no network; a missing printer never loses a sale | `desktop/tests/system.spec.ts`, `shell.spec.ts` |
 | **End to end** | A full working day, by touch keyboard and mouse, in Arabic and in English | `desktop/tests/flow.spec.ts` |
-| **Compatibility** | Every cashier and Admin screen at 1024×640, 1280×720, 1366×768, 1536×864 and 1920×1080, and in English; receipts on 58 and 80 mm paper at small and large text | `desktop/tests/compat.spec.ts`, `print.spec.ts` |
+| **Compatibility** | Every cashier and Admin screen, including the Wish payment screen and Settings, at 1000×560, 1093×614 (a 1366×768 screen at 125% scaling), 1024×640, 1280×720, 1366×768, 1536×864 and 1920×1080, and in English; receipts on 58 and 80 mm paper at small and large text | `desktop/tests/compat.spec.ts`, `print.spec.ts` |
 | **Layout** | Margins, label-to-field alignment, equal heights in a row, no overlap, nothing cut off or scrolling sideways, nothing hidden under the keyboard | `desktop/tests/layout.ts`, run by the compatibility tests and `fits()` in the flow test |
 | **Performance** | Speed with a year of history (10,000 orders) and a 600-product menu; start-up; memory | `backend/tests/test_performance.py`, `desktop/tests/performance.spec.ts` |
 | **Regression** | Every bug found so far has a test (list below) | various |
+| **Wish and default amount** | Wish payment, retry, refund (cash and Wish parts), reports, shift review, receipt, migration of old payments; the LBP box is pre-filled and typing dollars swaps it | `backend/tests/test_wish.py`, `desktop/tests/wish.spec.ts` |
+| **Application icon** | Valid Windows icon with every size, square picture, used by the app, installer and uninstaller | `desktop/tests/icon.spec.ts` |
 | **Security** | Permissions on every route, single-use approvals, guess slowing, secret on every request, sandboxed page, no web access, HTML in names cannot run | `test_auth.py`, `shell.spec.ts`, `receipt.test.ts` |
 
 ## Regression tests (bug → test that keeps it fixed)
@@ -35,6 +37,8 @@ Add `quick` to skip the real-app tests (about 2 minutes instead of 6).
 | Count badge crowding the price on narrow tiles | `layout.ts` badge rule |
 | Stale payment quote could enable the button | covered by `flow.spec.ts` payment steps |
 | Receipt dialog closed before it loaded | `flow.spec.ts` waits for dialogs |
+| A Wish payment must never add cash to the drawer or be partial | `test_wish.py` |
+| Cash buttons that no longer appear because the LBP box is pre-filled | `flow.spec.ts`, `system.spec.ts` follow the one-tap path |
 
 ## Figures from this machine (development Mac, not the POS computer)
 

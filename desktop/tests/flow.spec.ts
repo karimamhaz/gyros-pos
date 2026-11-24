@@ -264,7 +264,6 @@ test("a full day, in Arabic", async () => {
   await snap(page, "tables");
   await page.locator(".table-tile").nth(1).click();
   await button(page, "الدفع").click();
-  await button(page, "الباقي ليرة").click();
   await expect(page.getByText("المبلغ كامل")).toBeVisible();
   await button(page, "تأكيد الدفع").click();
   await button(page, "العودة إلى الطاولة").click();
@@ -380,7 +379,6 @@ test("the same screens in English", async () => {
   await snap(page, "en-order");
   await fits(page);
   await button(page, "Pay").click();
-  await button(page, "Rest in USD").click();
   await expect(
     page.getByText("Paid exactly").or(page.getByText("Change for the customer")),
   ).toBeVisible();
@@ -441,7 +439,6 @@ test("a price changed during payment is picked up by going back", async () => {
   await product(page, "لبن").click();
   await expect(page.locator(".total")).toContainText("70,000");
   await button(page, "الدفع").click();
-  await button(page, "الباقي ليرة").click();
   await page.evaluate(async (authorization) => {
     const headers = { authorization, "content-type": "application/json" };
     const menu = await (await fetch("/api/menu/all", { headers })).json();
@@ -454,7 +451,6 @@ test("a price changed during payment is picked up by going back", async () => {
   await button(page, "رجوع إلى الطلب").click();
   await expect(page.locator(".total")).toContainText("80,000");
   await button(page, "الدفع").click();
-  await button(page, "الباقي ليرة").click();
   await button(page, "تأكيد الدفع").click();
   await expect(page.getByText("تم الدفع")).toBeVisible();
   await app.close();

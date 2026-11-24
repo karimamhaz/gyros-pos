@@ -1,9 +1,8 @@
 from alembic import context
 
+import app.modules  # noqa: F401  (importing it registers every model, so Alembic sees all tables)
 from app.core.database import Base
-from app.modules import load_models
 
-load_models()
 engine = context.config.attributes["engine"]
 
 with engine.connect() as connection:

@@ -12,7 +12,7 @@ const ROWS: Record<Layout, string[][]> = {
   symbols: [[..."1234567890"], [..."-_.,/:;@#&"], [..."()%+=*!?'\""]],
 };
 
-export const keyboardKind = (el: Element | null): KeyboardKind | null =>
+const keyboardKind = (el: Element | null): KeyboardKind | null =>
   (el?.getAttribute("data-kb") as KeyboardKind | null) ?? null;
 
 /** Types into a field the way a person would, so React sees a normal change. */

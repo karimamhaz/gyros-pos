@@ -22,7 +22,6 @@ async function admin(page: Page) {
 async function sell(page: Page, item: string) {
   await product(page, item).click();
   await button(page, "الدفع").click();
-  await button(page, "الباقي ليرة").click();
   await button(page, "تأكيد الدفع").click();
   await expect(page.getByText("تم الدفع")).toBeVisible();
   const number = await page.getByText(/^طلب رقم \d+$/).textContent();
@@ -140,7 +139,6 @@ test("a printer that is missing never loses the sale", async () => {
   await button(page, "بدء الوردية").click();
   await product(page, "لبن").click();
   await button(page, "الدفع").click();
-  await button(page, "الباقي ليرة").click();
   await button(page, "تأكيد الدفع").click();
   await expect(page.getByText("تم الدفع")).toBeVisible();
   await expect(page.getByText("لم يحدد المدير الطابعة بعد")).toBeVisible();

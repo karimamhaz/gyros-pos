@@ -36,6 +36,8 @@ interface Review extends Row {
   cash_in: Money;
   cash_out: Money;
   expected: Money;
+  /** Paid by Wish during the shift: not cash, so it is not in the figures above. */
+  wish: number;
   declared: Money | null;
   closed_by: string | null;
   closed_by_admin: boolean;
@@ -214,6 +216,12 @@ function ReviewCard({ r }: { r: Review }) {
           )}
         </tbody>
       </table>
+      <div className="line mt-3">
+        <span>{t("sales.wish")}</span>
+        <b>
+          <Ltr>{formatNumber(r.wish)}</Ltr>
+        </b>
+      </div>
       <p className="soft mt-3">{t("shifts.no_expenses")}</p>
     </>
   );

@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @theme {
+  --spacing: 0.28rem;
   --color-ink: #161616;
   --color-ink-soft: #5c5c5c;
   --color-line: #d9d9d7;
@@ -14,6 +15,18 @@
 
 :root {
   --kb: 0px;
+  /* Spacing. Roomy by default; tighter on small windows (see the end of this file). */
+  --space-page: 30px 36px;
+  --space-work: 22px 28px;
+  --space-card: 34px 38px;
+  --space-bar: 16px 22px;
+  --space-item: 12px 22px;
+  --space-cell: 12px 18px;
+  --gap-form: 18px;
+  --gap-block: 22px;
+  --gap-tiles: 10px;
+  --gap-menu: 20px 32px;
+  --pad-tile: 12px 14px;
 }
 
 /* The same visible scrollbar on every system, so Windows and the test machine lay out alike. */
@@ -111,12 +124,12 @@
     position: relative;
   }
   .screen.dark {
-    padding: 28px 20px;
+    padding: 36px 28px;
     background: var(--color-ink);
     color: #fff;
     align-items: center;
     justify-content: safe center;
-    gap: 26px;
+    gap: 30px;
     overflow: auto;
   }
   .corner {
@@ -132,10 +145,10 @@
     background: #fff;
     color: var(--color-ink);
     border-radius: 7px;
-    padding: 26px 28px;
-    width: 460px;
+    padding: var(--space-card);
+    width: 480px;
     display: grid;
-    gap: 15px;
+    gap: var(--gap-form);
     flex: none;
   }
   .role {
@@ -165,7 +178,7 @@
   .picker {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    gap: 10px;
     max-height: 220px;
     overflow: auto;
   }
@@ -222,8 +235,8 @@
     color: #fff;
     display: flex;
     align-items: center;
-    padding: 0 20px;
-    gap: 16px;
+    padding: 0 28px;
+    gap: 22px;
   }
   .topbar nav {
     display: flex;
@@ -322,21 +335,53 @@
     display: block;
     font-size: 14px;
     font-weight: 600;
-    margin-bottom: 5px;
+    margin-bottom: 7px;
   }
   .input {
     background: #fff;
     border: 1px solid var(--color-edge);
     border-radius: 5px;
-    min-height: 46px;
-    padding: 0 14px;
+    min-height: 48px;
+    padding: 0 16px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
   }
   .input:focus-within {
     border-color: var(--color-ink);
     box-shadow: inset 0 0 0 1px var(--color-ink);
+  }
+  /* The same box for every control: no native arrows, borders or system fonts. */
+  .input input:not([type="checkbox"]),
+  .input textarea,
+  .input select,
+  .pick {
+    appearance: none;
+    -webkit-appearance: none;
+    border-radius: 0;
+    font: inherit;
+    color: inherit;
+  }
+  .input select,
+  .pick {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%235c5c5c' stroke-width='2'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0 center;
+    padding-inline-end: 22px;
+  }
+  .pick {
+    background-position: right 12px center;
+    padding-inline-end: 34px;
+  }
+  [dir="rtl"] .input select {
+    background-position: left 0 center;
+  }
+  [dir="rtl"] .pick {
+    background-position: left 12px center;
+  }
+  .input input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    padding: 6px;
   }
   .input input,
   .input textarea,
@@ -400,7 +445,7 @@
     font-size: 13px;
     font-weight: 600;
     border-radius: 3px;
-    padding: 2px 9px;
+    padding: 3px 11px;
     background: #e9e9e7;
     white-space: nowrap;
   }
@@ -420,7 +465,7 @@
     background: #fbeaea;
     color: var(--color-brand);
     border-radius: 4px;
-    padding: 10px 14px;
+    padding: 12px 16px;
     font-weight: 600;
   }
   .line {
@@ -440,14 +485,14 @@
     color: var(--color-ink-soft);
     font-weight: 600;
     text-align: start;
-    padding: 10px 14px;
+    padding: var(--space-cell);
     border-bottom: 1px solid var(--color-edge);
     white-space: nowrap;
   }
   td {
-    padding: 9px 14px;
+    padding: var(--space-cell);
     border-bottom: 1px solid #e6e6e4;
-    height: 48px;
+    height: 54px;
   }
   tbody tr:last-child td {
     border-bottom: 0;
@@ -457,10 +502,10 @@
   .page {
     flex: 1;
     min-height: 0;
-    padding: 20px 26px;
+    padding: var(--space-page);
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: var(--gap-block);
   }
   .order {
     flex: 1;
@@ -471,10 +516,24 @@
     flex: 1;
     min-width: 0;
     min-height: 0;
-    padding: 14px 20px;
+    padding: var(--space-work);
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: var(--gap-block);
+  }
+  .work.roomy {
+    padding: 28px 36px;
+    gap: 26px;
+  }
+  .method {
+    width: 250px;
+  }
+  .method .label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
   }
   .search .label,
   .bare .label {
@@ -490,16 +549,16 @@
   .cats {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-    gap: 12px 22px;
+    gap: var(--gap-menu);
     align-content: start;
     flex: 1;
-    padding: 2px;
+    padding: 4px;
   }
   .cat h3 {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 6px;
+    margin-bottom: 10px;
     font-weight: 700;
   }
   .cat h3::after {
@@ -510,7 +569,7 @@
   .tiles {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
+    gap: var(--gap-tiles);
   }
   fieldset {
     min-width: 0;
@@ -521,7 +580,7 @@
     border: 1px solid #cfcfcd;
     border-radius: 5px;
     min-height: 98px;
-    padding: 9px 11px;
+    padding: var(--pad-tile);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -571,27 +630,27 @@
     min-height: 0;
   }
   .ticket-head {
-    padding: 12px 18px;
+    padding: var(--space-bar);
     border-bottom: 1px solid var(--color-line);
   }
   .ticket-foot {
-    padding: 12px 18px;
+    padding: var(--space-bar);
     border-top: 2px solid var(--color-ink);
     display: grid;
-    gap: 8px;
+    gap: 10px;
   }
   .group-label {
-    padding: 7px 18px;
+    padding: 9px 22px;
     background: var(--color-page);
     color: var(--color-ink-soft);
     font-size: 13px;
     font-weight: 600;
   }
   .item {
-    padding: 8px 18px;
+    padding: var(--space-item);
     border-bottom: 1px solid #e6e6e4;
     display: flex;
-    gap: 12px;
+    gap: 14px;
     align-items: center;
     min-height: 60px;
   }
@@ -645,7 +704,7 @@
   .tables {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
-    gap: 14px;
+    gap: 18px;
     align-content: start;
     padding: 3px;
   }
@@ -654,7 +713,7 @@
     border: 1px solid #bdbdbb;
     background: #fff;
     border-radius: 6px;
-    padding: 14px;
+    padding: 18px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -686,7 +745,7 @@
     flex: none;
     background: var(--color-ink);
     color: #cfcfcf;
-    padding: 14px 0;
+    padding: 18px 0;
     display: flex;
     flex-direction: column;
     overflow: auto;
@@ -696,8 +755,8 @@
     display: block;
   }
   .side button {
-    padding: 0 20px;
-    min-height: 42px;
+    padding: 0 26px;
+    min-height: 44px;
     flex: none;
     text-align: start;
     font-weight: 500;
@@ -730,11 +789,11 @@
   }
   .kpis {
     display: flex;
-    gap: 14px;
+    gap: 18px;
   }
   .kpis .box {
     flex: 1;
-    padding: 12px 18px;
+    padding: 16px 22px;
   }
   .kpis b {
     font-size: 23px;
@@ -797,7 +856,7 @@
   .split {
     display: flex;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 24px;
     align-items: flex-start;
     min-height: 0;
   }
@@ -815,7 +874,7 @@
   .auto-cols {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-    gap: 16px;
+    gap: 24px;
     align-items: start;
   }
   .preview {
@@ -844,18 +903,18 @@
     display: grid;
     place-items: safe center;
     overflow: auto;
-    padding: 12px;
+    padding: 24px;
     z-index: 20;
   }
   .dialog {
     background: #fff;
     color: var(--color-ink);
     border-radius: 7px;
-    padding: 24px 28px;
-    width: 520px;
+    padding: var(--space-card);
+    width: 560px;
     max-width: 100%;
     display: grid;
-    gap: 14px;
+    gap: var(--gap-form);
     outline: none;
   }
   .dialog.wide {
@@ -957,5 +1016,41 @@
   }
   .stepper .qty span {
     min-width: 72px;
+  }
+}
+
+/* Small windows (a 1366 x 768 screen at 125% scaling is about 1093 x 614): tighter spacing. */
+@media (max-width: 1150px), (max-height: 700px) {
+  :root {
+    --spacing: 0.25rem;
+    --space-page: 20px 26px;
+    --space-work: 14px 20px;
+    --space-card: 24px 28px;
+    --space-bar: 12px 18px;
+    --space-item: 8px 18px;
+    --space-cell: 10px 14px;
+    --gap-form: 14px;
+    --gap-block: 16px;
+    --gap-tiles: 8px;
+    --gap-menu: 12px 22px;
+    --pad-tile: 9px 11px;
+  }
+  .work.roomy {
+    padding: 18px 28px;
+    gap: 16px;
+  }
+  .topbar {
+    height: 52px;
+    padding: 0 18px;
+    gap: 14px;
+  }
+  .overlay {
+    padding: 12px;
+  }
+  .tile {
+    min-height: 84px;
+  }
+  td {
+    height: 48px;
   }
 }

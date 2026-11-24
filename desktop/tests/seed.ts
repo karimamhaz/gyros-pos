@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 
 export const ADMIN_PASSWORD = "owner-pass";
-export const CSV = [
+const CSV = [
   "name,category,price_lbp,available",
   ...[
     [
