@@ -132,3 +132,20 @@ describe("on-screen keyboard", () => {
     expect(value()).toBe("4,500");
   });
 });
+
+describe("more amounts", () => {
+  test("round trips and edge cases", () => {
+    expect(formatNumber(0)).toBe("0");
+    expect(formatNumber(-250000)).toBe("−250,000");
+    expect(formatUsd(-1844)).toBe("−$18.44");
+    expect(formatUsd(100)).toBe("$1.00");
+    expect(parseAmount("LBP", "1,234,567")?.value).toBe(1234567);
+    expect(parseAmount("LBP", "9999999999999")).toBeNull();
+    expect(parseAmount("LBP", "")).toEqual({ text: "", value: 0 });
+    expect(parseAmount("USD", "٣.٥")?.value).toBe(350);
+    expect(parseAmount("USD", "0.5")?.value).toBe(50);
+    expect(parseAmount("USD", "1,000.25")?.value).toBe(100025);
+    expect(parseAmount("USD", ".5")?.value).toBe(50);
+    expect(parseAmount("LBP", "12a")).toBeNull();
+  });
+});

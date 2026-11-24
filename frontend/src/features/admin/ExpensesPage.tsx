@@ -74,8 +74,8 @@ export function ExpensesPage() {
         </div>
       </Head>
       <ErrorNote error={error ?? data.error} />
-      <div className="flex gap-4 min-h-0 flex-1 items-start">
-        <div className="flex-1 grid gap-3 min-h-0 max-h-full">
+      <div className="split scroll">
+        <div className="main-panel grid gap-3">
           {data.data?.entries.length === 0 && <Empty>{t("expenses.none")}</Empty>}
           {!!data.data?.entries.length && (
             <Table head={[t("day"), t("type"), t("category"), t("expenses.note"), t("amount"), ""]}>
@@ -160,7 +160,7 @@ function NewEntry({
   const [day, setDay] = useState(today);
   const { busy, error, run } = useAction();
   return (
-    <div className="box p-5 grid gap-3 content-start w-[340px] flex-none scroll max-h-full">
+    <div className="box p-5 grid gap-3 content-start side-panel">
       <h2>{t("expenses.new")}</h2>
       <Segmented<Kind>
         options={[

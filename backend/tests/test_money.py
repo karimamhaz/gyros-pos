@@ -46,6 +46,11 @@ def test_change():
         change_for(245000, 300, RATE)
 
 
+def test_displayed_usd_is_the_smallest_amount_that_settles_example():
+    assert lbp_to_usd_cents(4835650, 1748) == 276639
+    assert lbp_to_usd_cents(0, 89500) == 0
+
+
 def test_displayed_usd_always_settles():
     for lbp in range(1, 2_000_001, 997):
         assert usd_cents_to_lbp(lbp_to_usd_cents(lbp, RATE), RATE) >= lbp

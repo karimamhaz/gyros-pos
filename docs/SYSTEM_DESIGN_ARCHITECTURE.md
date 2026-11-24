@@ -58,7 +58,7 @@ Used as defaults until the owner says otherwise. **A4–A10 and A15 were confirm
 | A20 | The wording in D33 applies to every Arabic label, including fees and receipts |
 | A4 | Rounding is to the nearest 10,000, halves up. A discounted total never exceeds the undiscounted one |
 | A5 | Undiscounted totals are not rounded |
-| A6 | USD equivalents round **up** to the cent, so paying the displayed USD amount always settles the bill |
+| A6 | The displayed USD equivalent is the smallest amount in cents that settles the bill (normally rounded **up**), so paying it always settles the bill |
 | A7 | After a table's bill is fully paid, new items start a new bill on the same sitting |
 | A8 | Partial payments are allowed for dine-in and delivery, not takeaway |
 | A9 | Refunds cover the whole order, not single items, and do not give back a promo use |
@@ -143,7 +143,7 @@ All amounts are integers: LBP in whole pounds, USD in cents, rate in whole LBP p
 | Operation | Rule |
 |---|---|
 | USD to LBP | `cents × rate ÷ 100`, halves up |
-| LBP to displayed USD | `ceil(lbp × 100 ÷ rate)` cents (A6) |
+| LBP to displayed USD | the smallest amount in cents that settles the bill, normally `ceil(lbp × 100 ÷ rate)` (A6) |
 | Gross | items + delivery fee |
 | Discount | `gross × percent ÷ 100`, whole LBP, halves up |
 | Total, no promo | gross, not rounded (A5) |

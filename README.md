@@ -5,6 +5,7 @@ A fully offline point of sale for one Windows 10 restaurant computer. Arabic and
 - [Architecture and decisions](docs/SYSTEM_DESIGN_ARCHITECTURE.md)
 - [Building plan](docs/BUILDING_PLAN.md)
 - [Approved screen design](docs/design/Gyros_POS_Design.pdf)
+- [Testing](docs/TESTING.md) and the [changelog](CHANGELOG.md)
 - [Deployment, backup and recovery guide](docs/DEPLOYMENT_GUIDE.md)
 - [Progress, rulings and what is not verified](HANDOFF.md)
 
@@ -41,6 +42,14 @@ cd desktop && npm start
 Development data is kept in Electron's user data folder. Set `POS_DATA_DIR` and `POS_BACKUP_DIR` to use other folders.
 
 ## Test
+
+Everything at once, with a short list of what each suite proves in [docs/TESTING.md](docs/TESTING.md):
+
+```bash
+scripts/test-all.sh
+```
+
+Or one suite at a time:
 
 ```bash
 cd backend && uv run pytest && uv run ruff check . && uv run ruff format --check .

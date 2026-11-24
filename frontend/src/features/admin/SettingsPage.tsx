@@ -53,7 +53,7 @@ export function SettingsPage() {
         </Button>
       </Head>
       <ErrorNote error={error} />
-      <div className="grid grid-cols-3 gap-4 items-start scroll">
+      <div className="auto-cols scroll">
         <section className="box p-5 grid gap-3.5">
           <h2>{t("settings.selling")}</h2>
           <AmountField

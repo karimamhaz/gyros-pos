@@ -1,6 +1,7 @@
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { audit } from "./layout";
 import { _electron as electron, expect, type Page } from "@playwright/test";
 
 export const dataDir = () => mkdtempSync(path.join(tmpdir(), "pos-"));
@@ -42,4 +43,5 @@ export async function fits(page: Page) {
     return { x: root.scrollWidth > innerWidth, outside: outside.map((el) => el.textContent) };
   });
   expect(over).toEqual({ x: false, outside: [] });
+  expect(await audit(page)).toEqual([]);
 }

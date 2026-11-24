@@ -110,8 +110,8 @@ export function PrinterPage() {
       {problems ? (
         <PrintProblems />
       ) : (
-        <div className="flex gap-4 min-h-0 flex-1">
-          <div className="grid grid-cols-2 gap-4 flex-1 scroll content-start">
+        <div className="split scroll">
+          <div className="auto-cols main-panel">
             <section className="box p-5 grid gap-3.5 content-start">
               <h2>{t("printer.paper_section")}</h2>
               <ChoiceField

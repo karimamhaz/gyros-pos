@@ -107,8 +107,8 @@ function Open({ seconds, onClose }: { seconds: number; onClose: () => void }) {
           {t("quick.back")}
         </button>
       </header>
-      <main className="page" style={{ flexDirection: "row" }}>
-        <div className="flex-1 grid gap-3 min-h-0 content-start scroll">
+      <main className="page split scroll">
+        <div className="main-panel grid gap-3 content-start">
           <ErrorNote error={error ?? menu.error} />
           <Table head={[t("product"), t("price"), t("product.selling")]}>
             {menu.data?.products.map((p) => (
@@ -145,7 +145,7 @@ function Open({ seconds, onClose }: { seconds: number; onClose: () => void }) {
             ))}
           </Table>
         </div>
-        <div className="box p-5 grid gap-4 content-start w-[370px]">
+        <div className="box p-5 grid gap-4 content-start side-panel">
           <h2>{t("rate")}</h2>
           <AmountField
             label={t("rate.one_usd")}

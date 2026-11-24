@@ -101,9 +101,9 @@ export function ShiftsPage({ current, reloadCurrent }: Props) {
       </Head>
       <ErrorNote error={shifts.error ?? review.error} />
       {shifts.data?.length === 0 && <Empty>{t("shifts.none")}</Empty>}
-      <div className="flex gap-4 items-start min-h-0 flex-1">
+      <div className="split scroll">
         {!!shifts.data?.length && (
-          <div className="flex-1 grid min-h-0 max-h-full">
+          <div className="main-panel grid">
             <Table head={[t("role.cashier"), t("shifts.closed"), t("status"), ""]}>
               {shifts.data.map((r) => (
                 <tr key={r.id}>
@@ -131,7 +131,7 @@ export function ShiftsPage({ current, reloadCurrent }: Props) {
           </div>
         )}
         {review.data && (
-          <div className="box p-5 flex-1">
+          <div className="box p-5 main-panel">
             <ReviewCard r={review.data} />
           </div>
         )}

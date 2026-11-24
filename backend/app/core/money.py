@@ -32,10 +32,9 @@ def usd_cents_to_lbp(cents: int, rate: int) -> int:
 
 
 def lbp_to_usd_cents(lbp: int, rate: int) -> int:
-    """Rounds up, so paying the displayed amount always settles the bill."""
+    """The smallest USD amount in cents that settles `lbp`, so paying it is always enough."""
     _check(lbp, rate)
-    cents = -(-lbp * 100 // rate)
-    # Half-up conversion back can fall short at very low rates.
+    cents = max(0, lbp * 100 // rate - 1)
     while usd_cents_to_lbp(cents, rate) < lbp:
         cents += 1
     return cents

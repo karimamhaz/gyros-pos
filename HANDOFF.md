@@ -1,5 +1,7 @@
 # Handoff
 
+**Version 1.1.0** (24 November 2026): interface alignment and a full test programme. See [CHANGELOG.md](CHANGELOG.md) and [docs/TESTING.md](docs/TESTING.md).
+
 State of v1, updated with every step. Git history has the detail.
 
 ## Progress
@@ -37,6 +39,10 @@ Decisions made while building, where the plan or spec left a choice.
 14. Admin's extra copies setting applies to the automatic receipt only.
 15. The menu is not preloaded; `docs/gyros_menu.csv` is imported by Admin.
 16. Dates default to the business day, which after midnight is the previous date until the cutoff.
+
+17. Every window from 1024 × 640 upwards is supported; below that the interface scrolls. Windows display scaling counts: 125% on a 1920 × 1080 screen is 1536 × 864.
+18. Scrollbars are styled the same everywhere, so Windows and the test machine lay out identically.
+19. The displayed USD amount is the smallest amount in cents that settles the bill (A6, refined).
 
 ## Assumptions still to confirm
 

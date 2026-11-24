@@ -81,9 +81,9 @@ export function ProductsPage() {
       </Head>
       <ErrorNote error={error ?? menu.error} />
       {data && !data.categories.length && <Empty>{t("products.start")}</Empty>}
-      <div className="flex gap-4 min-h-0 flex-1">
+      <div className="split scroll">
         {!!data?.products.length && (
-          <div className="flex-1 min-h-0 grid content-start">
+          <div className="main-panel grid content-start">
             <Table head={[t("product"), t("category"), t("price"), t("status"), ""]}>
               {data.products.map((p) => (
                 <tr key={p.id}>
@@ -158,7 +158,7 @@ function ProductEditor({
   const { busy, error, run } = useAction();
 
   return (
-    <div className="box p-5 grid gap-3.5 content-start w-[330px] flex-none scroll">
+    <div className="box p-5 grid gap-3.5 content-start side-panel">
       <h2>{t(product ? "product.edit" : "product.new")}</h2>
       <Field label={t("name")} value={name} onChange={setName} maxLength={60} />
       <ChoiceField
